@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="margin_items">15dp</dimen>
+    <dimen name="margin_rate">20dp</dimen>
+    <dimen name="title_text_size">14sp</dimen>
+    <dimen name="image_size">100dp</dimen>
+    <dimen name="title_width_product">210dp</dimen>
+    <dimen name="title_product_width">115dp</dimen>
+    <dimen name="margin_base">10dp</dimen>
+    <dimen name="elevation_card">10dp</dimen>
+    <dimen name="radius_card">5dp</dimen>
+    <dimen name="padding_card">4dp</dimen>
+    <dimen name="space_image">15dp</dimen>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/coolShopMainFragment">
+
+    <fragment
+        android:id="@+id/coolShopMainFragment"
+        android:name="com.example.coolshop.main.ui.CoolShopMainFragment"
+        android:label="CoolShopMainFragment" >
+        <action
+            android:id="@+id/action_coolShopMainFragment_to_coolShopDetailsFragment"
+            app:destination="@id/coolShopDetailsFragment">
+            <argument
+                android:name="id"
+                android:defaultValue="0"
+                app:argType="string"/>
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/coolShopDetailsFragment"
+        android:name="com.example.coolshop.details.ui.CoolShopDetailsFragment"
+        android:label="CoolShopDetailsFragment" />
+
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.example.coolshop.cart.ui.CartFragment"
+        android:label="CartFragment" />
+
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="com.example.coolshop.user.ui.UserFragment"
+        android:label="UserFragment" />
+</navigation>

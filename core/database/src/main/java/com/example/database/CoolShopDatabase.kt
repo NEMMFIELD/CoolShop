@@ -13,7 +13,7 @@ class CoolShopDatabase internal constructor(private val database: CoolShopRoomDa
 }
 
 @Database(entities = [CoolShopDBO::class], version = 1, exportSchema = false)
- abstract class CoolShopRoomDatabase : RoomDatabase() {
+abstract class CoolShopRoomDatabase : RoomDatabase() {
     abstract fun coolShopDao(): CoolShopDao
 }
 
@@ -22,6 +22,8 @@ fun CoolShopDatabase(applicationContext: Context): CoolShopDatabase {
         checkNotNull(applicationContext.applicationContext),
         CoolShopRoomDatabase::class.java,
         "coolShop"
-    ).build()
+    ).allowMainThreadQueries()
+        .fallbackToDestructiveMigration()
+        .build()
     return CoolShopDatabase(coolShopRoomDatabase)
 }

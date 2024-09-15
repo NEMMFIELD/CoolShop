@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_details"
+    app:startDestination="@id/coolShopDetailsFragment">
+
+    <fragment
+        android:id="@+id/coolShopDetailsFragment"
+        android:name="com.example.coolshop.details.ui.CoolShopDetailsFragment"
+        android:label="CoolShopDetailsFragment" >
+        <action
+            android:id="@+id/action_coolShopDetailsFragment_to_showingReviewsFragment"
+            app:destination="@id/showingReviewsFragment">
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/showingReviewsFragment"
+        android:name="com.example.coolshop.reviews.ui.ShowingReviewsFragment"
+        android:label="ShowingReviewsFragment" >
+    <argument
+        android:name="id"
+        android:defaultValue="0"
+        app:argType="string"/>
+    <deepLink
+        app:uri="android-app://com.example.coolshop.reviews.ui/showingReviewsFragment/{id}"/>
+    </fragment>
+
+    <include app:graph="@navigation/navigation_reviews"/>
+</navigation>

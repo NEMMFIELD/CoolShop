@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.cart.data.CartAdapter
 import com.example.coolshop.cart.data.ClickListener
 import com.example.coolshop.cart.databinding.FragmentCartBinding
+import com.example.coolshop.cart.domain.CartRepository
 import com.example.data.CoolShopModel
-import com.example.database.utils.Mapper
+import com.example.utils.Mapper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,8 +21,8 @@ class CartFragment : Fragment(), ClickListener {
     private var _binding: FragmentCartBinding? = null
     private val binding get() = _binding
     private val viewModel: CartViewModel by viewModels()
-    private val cartAdapter by lazy { CartAdapter(this) }
-    private lateinit var recyclerView: RecyclerView
+    private var cartAdapter:CartAdapter? = null
+    private var recyclerView: RecyclerView? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,7 +37,7 @@ class CartFragment : Fragment(), ClickListener {
         super.onViewCreated(view, savedInstanceState)
         setupRecycler()
         viewModel.cartedProducts.observe(viewLifecycleOwner) {
-            cartAdapter.submitList(it.map { Mapper.mapModelDBOtoModel(it) })
+            cartAdapter?.submitList(it.map { com.example.utils.Mapper.mapModelDBOtoModel(it) })
         }
         viewModel.totalPrice.observe(viewLifecycleOwner) {
             binding?.totalPrice?.text = it.toString().plus("$")
@@ -45,18 +45,22 @@ class CartFragment : Fragment(), ClickListener {
 
     }
 
+    override fun onDestroyView() {
+        _binding = null
+        cartAdapter = null
+        recyclerView = null
+        super.onDestroyView()
+    }
+
     private fun setupRecycler() {
         recyclerView = binding!!.cardRecyclerview
-        recyclerView.layoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false)
-        recyclerView.adapter = cartAdapter
+        recyclerView?.layoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL,false)
+        cartAdapter = CartAdapter(this)
+        recyclerView?.adapter = cartAdapter
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() = CartFragment()
-    }
 
     override fun clickItem(item: CoolShopModel) {
-        viewModel.removeItem(Mapper.mapModeltoDBO(item))
+        viewModel.removeItem(com.example.utils.Mapper.mapModeltoDBO(item))
     }
 }

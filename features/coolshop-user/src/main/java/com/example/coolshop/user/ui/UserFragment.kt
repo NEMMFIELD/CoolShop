@@ -47,6 +47,11 @@ class UserFragment : Fragment() {
             }
         }
     }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
     private fun setupAccount() {
         viewModel.account.username = binding?.idEdtName?.text.toString()
         viewModel.account.password = binding?.idEdtPass?.text.toString()

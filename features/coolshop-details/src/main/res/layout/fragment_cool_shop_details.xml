@@ -22,6 +22,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/pngwing"
         android:background="#00000000"
+        android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -61,7 +62,7 @@
         tools:text="title" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/detailsProductImage"
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -106,12 +107,34 @@
             android:text="Rating"
             android:textSize="16sp" />
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/dialogShow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#3F51B5"
+            android:textColor="@color/white"
+            android:text="@string/add_review" />
+        <Button
+            android:id="@+id/btn_show_reviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#3F51B5"
+            android:layout_marginStart="30dp"
+            android:textColor="@color/white"
+            android:text="@string/show_reviews"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_add_cart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="#3F51B5"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/white"
         android:text="@string/add_to_cart" />
 </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

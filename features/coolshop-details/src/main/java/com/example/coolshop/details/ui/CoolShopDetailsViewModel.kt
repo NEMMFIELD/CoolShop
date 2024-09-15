@@ -26,13 +26,13 @@ class CoolShopDetailsViewModel @Inject  constructor(
         MutableStateFlow(ApiState.Empty)
     val postStateFlow: StateFlow<ApiState<CoolShopModel>>
         get() = _postStateFlow
-    private val id = savedStateHandle.get<String>(ID)
+     val id = savedStateHandle.get<String>(ID)
     companion object {
         const val ID = "id"
     }
 
     init {
-        loadSelectedProduct(id ?: "0")
+        loadSelectedProduct(id.toString())
     }
 
     private fun loadSelectedProduct(id: String) {

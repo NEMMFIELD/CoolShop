@@ -9,10 +9,14 @@ import com.example.coolshop.details.data.CoolShopDetailsRepositoryImpl
 import com.example.coolshop.details.domain.CoolShopDetailsRepository
 import com.example.coolshop.main.data.models.CoolShopRepositoryImpl
 import com.example.coolshop.main.domain.CoolShopRepository
+import com.example.coolshop.reviews.data.ReviewsRepositoryImpl
+import com.example.coolshop.reviews.domain.ReviewsRepository
 import com.example.coolshop.user.data.LoginRepositoryImpl
 import com.example.coolshop.user.domain.LoginRepository
 import com.example.database.CoolShopDatabase
+import com.example.database.UserReviewsDatabase
 import com.example.database.dao.CoolShopDao
+import com.example.database.dao.UserReviewsDao
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -94,7 +98,17 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideUserReviewsDatabase(@ApplicationContext context:Context):UserReviewsDatabase {
+        return UserReviewsDatabase(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideDao(database: CoolShopDatabase) = database.coolShopDao
+
+    @Provides
+    @Singleton
+    fun provideUserReviewsDao(database: UserReviewsDatabase) = database.userReviewsDao
 
     @Provides
     @Singleton
@@ -112,5 +126,11 @@ object AppModule {
         api: CoolShopApi,
         sharedPreferences: SharedPreferences
     ): LoginRepository = LoginRepositoryImpl(api, sharedPreferences)
+
+    @Provides
+    @Singleton
+    fun provideRepositoryAddingReview(
+        dao: UserReviewsDao
+    ): ReviewsRepository = ReviewsRepositoryImpl(dao)
 
 }

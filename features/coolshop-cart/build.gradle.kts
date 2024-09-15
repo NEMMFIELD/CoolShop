@@ -56,4 +56,5 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:State"))
+    implementation(project(":core:utils"))
 }

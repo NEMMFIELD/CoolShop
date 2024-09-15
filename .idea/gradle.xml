@@ -16,12 +16,14 @@
             <option value="$PROJECT_DIR$/core/coolshop-api" />
             <option value="$PROJECT_DIR$/core/data" />
             <option value="$PROJECT_DIR$/core/database" />
-            <option value="$PROJECT_DIR$/core/navigation" />
+            <option value="$PROJECT_DIR$/core/utils" />
             <option value="$PROJECT_DIR$/features" />
             <option value="$PROJECT_DIR$/features/coolshop-cart" />
             <option value="$PROJECT_DIR$/features/coolshop-details" />
             <option value="$PROJECT_DIR$/features/coolshop-main" />
+            <option value="$PROJECT_DIR$/features/coolshop-reviews" />
             <option value="$PROJECT_DIR$/features/coolshop-user" />
+            <option value="$PROJECT_DIR$/utils" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

@@ -2,13 +2,13 @@ package com.example.utils
 
 import com.example.coolshop.api.models.ResponseItem
 import com.example.data.CoolShopModel
-import com.example.data.ReviewModel
+import com.example.data.UserReviewModel
 import com.example.database.models.CoolShopDBO
 import com.example.database.models.UserReviewDBO
 
 class Mapper {
     companion object {
-        fun mapModeltoDBO(
+        fun mapModelToDBO(
             shopModel: CoolShopModel,
 
             ): CoolShopDBO {
@@ -24,7 +24,7 @@ class Mapper {
             )
         }
 
-        fun mapModelDBOtoModel(shopDBO: CoolShopDBO): CoolShopModel = CoolShopModel(
+        fun mapModelDBOToModel(shopDBO: CoolShopDBO): CoolShopModel = CoolShopModel(
             id = shopDBO.id,
             title = shopDBO.title,
             imgPath = shopDBO.imgPath,
@@ -35,9 +35,8 @@ class Mapper {
             isLiked = shopDBO.isLiked
         )
 
-        fun mapDTOtoModel(
+        fun mapDTOToModel(
             shopDTO: ResponseItem,
-
             ): CoolShopModel {
             return CoolShopModel(
                 id = shopDTO.id,
@@ -51,14 +50,14 @@ class Mapper {
             )
         }
 
-        fun mapReviewDBOToReview(reviewDBO: UserReviewDBO): ReviewModel = ReviewModel(
+        fun mapReviewDBOToReview(reviewDBO: UserReviewDBO): UserReviewModel = UserReviewModel(
             id = reviewDBO.reviewId,
             user = reviewDBO.userName,
             review = reviewDBO.review,
             productId = reviewDBO.productId
         )
 
-        fun mapReviewModelToReviewDbo(review: ReviewModel): UserReviewDBO = UserReviewDBO(
+        fun mapReviewModelToReviewDbo(review: UserReviewModel): UserReviewDBO = UserReviewDBO(
             userName = review.user,
             review = review.review,
             reviewId = review.id,

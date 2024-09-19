@@ -9,7 +9,7 @@ import coil.load
 import com.example.coolshop.cart.databinding.CartItemBinding
 import com.example.data.CoolShopModel
 
-class CartAdapter(private val itemClickListener: ClickListener) : ListAdapter<CoolShopModel, CartAdapter.ViewHolder>(CoolShopDiffUtil()) {
+class CartAdapter internal constructor(private val itemClickListener: ClickListener) : ListAdapter<CoolShopModel, CartAdapter.ViewHolder>(CoolShopDiffUtil()) {
     inner class ViewHolder(private val binding: CartItemBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(model: CoolShopModel) {
                 with (binding) {
@@ -54,6 +54,6 @@ class CartAdapter(private val itemClickListener: ClickListener) : ListAdapter<Co
         }
     }
 }
-interface ClickListener {
+internal interface ClickListener {
     fun clickItem(item: CoolShopModel)
 }

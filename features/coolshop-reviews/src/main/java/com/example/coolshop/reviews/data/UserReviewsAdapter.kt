@@ -9,15 +9,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.reviews.databinding.ItemShowReviewBinding
-import com.example.data.ReviewModel
+import com.example.data.UserReviewModel
 import com.google.android.material.shape.MaterialShapeDrawable
 
-class UserReviewsAdapter(private val reviewsList:List<ReviewModel>,private val context:Context) :
-    ListAdapter<ReviewModel, UserReviewsAdapter.ViewHolder>(UserReviewsDiffUtil()) {
+class UserReviewsAdapter(private val reviewsList:List<UserReviewModel>, private val context:Context) :
+    ListAdapter<UserReviewModel, UserReviewsAdapter.ViewHolder>(UserReviewsDiffUtil()) {
     inner class ViewHolder(private val binding: ItemShowReviewBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(model: ReviewModel) {
+        fun bind(model: UserReviewModel) {
             with(binding) {
                 showedUser.text = model.user
                 showedReview.text = model.review
@@ -44,17 +44,17 @@ class UserReviewsAdapter(private val reviewsList:List<ReviewModel>,private val c
 
     }
 
-    class UserReviewsDiffUtil : DiffUtil.ItemCallback<ReviewModel>() {
+    class UserReviewsDiffUtil : DiffUtil.ItemCallback<UserReviewModel>() {
         private val payLoad = Any()
-        override fun areItemsTheSame(oldItem: ReviewModel, newItem: ReviewModel): Boolean {
+        override fun areItemsTheSame(oldItem: UserReviewModel, newItem: UserReviewModel): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: ReviewModel, newItem: ReviewModel): Boolean {
+        override fun areContentsTheSame(oldItem: UserReviewModel, newItem: UserReviewModel): Boolean {
             return oldItem == newItem
         }
 
-        override fun getChangePayload(oldItem: ReviewModel, newItem: ReviewModel): Any? {
+        override fun getChangePayload(oldItem: UserReviewModel, newItem: UserReviewModel): Any? {
             return payLoad
         }
 

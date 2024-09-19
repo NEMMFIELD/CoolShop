@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class CoolShopDetailsUseCase @Inject constructor (private val repositoryImpl: CoolShopDetailsRepository) {
+internal class CoolShopDetailsUseCase @Inject constructor (private val repositoryImpl: CoolShopDetailsRepository) {
     fun execute(id:String): Flow<CoolShopModel> = flow {
         val model = repositoryImpl.loadProductDetails(id)
-        val details = com.example.utils.Mapper.mapDTOtoModel(model)
+        val details = com.example.utils.Mapper.mapDTOToModel(model)
         emit(details)
     }.flowOn(Dispatchers.IO)
 }

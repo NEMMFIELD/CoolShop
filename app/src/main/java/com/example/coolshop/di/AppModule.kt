@@ -9,8 +9,8 @@ import com.example.coolshop.details.data.CoolShopDetailsRepositoryImpl
 import com.example.coolshop.details.domain.CoolShopDetailsRepository
 import com.example.coolshop.main.data.models.CoolShopRepositoryImpl
 import com.example.coolshop.main.domain.CoolShopRepository
-import com.example.coolshop.reviews.data.ReviewsRepositoryImpl
-import com.example.coolshop.reviews.domain.ReviewsRepository
+import com.example.coolshop.reviews.data.UserUserReviewsRepositoryImpl
+import com.example.coolshop.reviews.domain.UserReviewsRepository
 import com.example.coolshop.user.data.LoginRepositoryImpl
 import com.example.coolshop.user.domain.LoginRepository
 import com.example.database.CoolShopDatabase
@@ -131,6 +131,6 @@ object AppModule {
     @Singleton
     fun provideRepositoryAddingReview(
         dao: UserReviewsDao
-    ): ReviewsRepository = ReviewsRepositoryImpl(dao)
+    ): UserReviewsRepository = UserUserReviewsRepositoryImpl(dao)
 
 }

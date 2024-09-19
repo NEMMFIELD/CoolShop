@@ -4,7 +4,7 @@ import com.example.data.CoolShopModel
 import com.example.database.models.CoolShopDBO
 import kotlinx.coroutines.flow.Flow
 
-interface CartRepository {
+ interface CartRepository {
     var flowCart: Flow<List<CoolShopDBO>>
     var flowSum: Flow<Double?>
     suspend fun loadProductsFromDatabase(): List<CoolShopModel>

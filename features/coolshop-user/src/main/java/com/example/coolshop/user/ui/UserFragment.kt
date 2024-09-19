@@ -7,8 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import com.example.coolshop.api.models.LoginRequest
 import com.example.coolshop.user.databinding.FragmentUserBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,7 +28,6 @@ class UserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.token.observe(viewLifecycleOwner) { token ->
-            println("Token is $token")
             if (token.isNotEmpty()) {
                 viewModel.saveToken(token)
                 binding?.idTVResponse?.text = "Current user is: ${
@@ -38,7 +35,7 @@ class UserFragment : Fragment() {
                 }"
             }
         }
-        with (binding) {
+        with(binding) {
             this?.idBtnPost?.setOnClickListener {
                 setupAccount()
                 viewModel.login(
@@ -52,13 +49,10 @@ class UserFragment : Fragment() {
         _binding = null
         super.onDestroyView()
     }
+
     private fun setupAccount() {
         viewModel.account.username = binding?.idEdtName?.text.toString()
         viewModel.account.password = binding?.idEdtPass?.text.toString()
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) = UserFragment()
-    }
 }

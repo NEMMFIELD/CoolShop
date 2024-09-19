@@ -1,33 +1,19 @@
 package com.example.coolshop.main.ui
 
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.annotation.IdRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.ActionOnlyNavDirections
-import androidx.navigation.NavController
-import androidx.navigation.NavDeepLinkBuilder
 import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.NavDirections
-import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.main.R
@@ -42,12 +28,10 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
-
     private var _binding: FragmentCoolShopMainBinding? = null
     private val binding get() = _binding
-    private var coolShopAdapter:CoolShopAdapter? = null
-
-    private  var recyclerView: RecyclerView? = null
+    private var coolShopAdapter: CoolShopAdapter? = null
+    private var recyclerView: RecyclerView? = null
     private val viewModel: CoolShopViewModel by viewModels()
 
     override fun onCreateView(
@@ -108,13 +92,11 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
     private fun setupRecycler() {
         recyclerView = binding!!.recyclerView
         recyclerView?.layoutManager = GridLayoutManager(requireContext(), 2)
-        coolShopAdapter = CoolShopAdapter(emptyList(),this,this)
+        coolShopAdapter = CoolShopAdapter(emptyList(), this, this)
         recyclerView?.adapter = coolShopAdapter
         val itemDecoration = ItemOffsetDecoration(10)
         recyclerView?.addItemDecoration(itemDecoration)
     }
-
-
 
     override fun like(product: CoolShopModel, position: Int) {
         product.isLiked = !product.isLiked
@@ -123,10 +105,9 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
     }
 
     override fun clickItem(item: CoolShopModel) {
-       // val bundle = bundleOf("id" to item.id)
-            val request = NavDeepLinkRequest.Builder
-                .fromUri("android-app://com.example.coolshop.details.ui/coolShopDetailsFragment/${item.id}".toUri())
-                .build()
+        val request = NavDeepLinkRequest.Builder
+            .fromUri("android-app://com.example.coolshop.details.ui/coolShopDetailsFragment/${item.id}".toUri())
+            .build()
         findNavController().navigate(request)
     }
 

@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor(
+class UserViewModel @Inject internal constructor(
     private val useCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase
 ) : ViewModel() {

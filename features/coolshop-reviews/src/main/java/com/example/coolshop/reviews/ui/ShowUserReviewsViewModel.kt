@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coolshop.reviews.domain.LoadUserReviewsUseCase
-import com.example.data.ReviewModel
+import com.example.data.UserReviewModel
 import com.example.state.ApiState
 import com.example.utils.Mapper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,16 +15,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ShowUserReviewsViewModel @Inject constructor(
+class ShowUserReviewsViewModel @Inject internal constructor(
     private val loadUserReviewsUseCase: LoadUserReviewsUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _reviewsStateFlow: MutableStateFlow<ApiState<List<ReviewModel>>> =
+    private val _reviewsStateFlow: MutableStateFlow<ApiState<List<UserReviewModel>>> =
         MutableStateFlow(ApiState.Empty)
     val reviewsStateFlow get() = _reviewsStateFlow
 
     val productId = savedStateHandle.get<String>(PRODUCT_ID)
+
     companion object {
         const val PRODUCT_ID = "id"
     }

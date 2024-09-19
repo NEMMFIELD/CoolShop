@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.navigation.features)
     debugImplementation(libs.leak.canary)
+    implementation(libs.splash.screen)
     implementation(project(":core:coolshop-api"))
     implementation(project(":core:data"))
     implementation(project(":features:coolshop-main"))

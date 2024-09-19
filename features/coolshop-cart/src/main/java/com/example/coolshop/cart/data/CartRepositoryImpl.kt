@@ -4,7 +4,6 @@ import com.example.coolshop.cart.domain.CartRepository
 import com.example.data.CoolShopModel
 import com.example.database.dao.CoolShopDao
 import com.example.database.models.CoolShopDBO
-import com.example.utils.Mapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -23,7 +22,7 @@ class CartRepositoryImpl @Inject constructor(private val dao: CoolShopDao) : Car
         val dbList = dao.getAll()
         var models: List<CoolShopModel> = ArrayList()
         dbList.forEach {
-            models = listOf<CoolShopModel>(com.example.utils.Mapper.mapModelDBOtoModel(it))
+            models = listOf<CoolShopModel>(com.example.utils.Mapper.mapModelDBOToModel(it))
         }
         return models
     }

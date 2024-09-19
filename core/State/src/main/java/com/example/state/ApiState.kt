@@ -3,5 +3,5 @@ package com.example.state
  sealed class ApiState<out T> {
     class Failure(val message:Throwable): ApiState<Nothing>()
     class Success<T>(val data:T): ApiState<T>()
-    object Empty : ApiState<Nothing>()
+    data object Empty : ApiState<Nothing>()
 }

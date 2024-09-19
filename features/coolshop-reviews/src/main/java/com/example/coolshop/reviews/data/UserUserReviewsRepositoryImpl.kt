@@ -1,12 +1,11 @@
 package com.example.coolshop.reviews.data
 
-import com.example.coolshop.reviews.domain.ReviewsRepository
+import com.example.coolshop.reviews.domain.UserReviewsRepository
 import com.example.database.dao.UserReviewsDao
 import com.example.database.models.UserReviewDBO
-import com.example.utils.Mapper
 import javax.inject.Inject
 
-class ReviewsRepositoryImpl @Inject constructor(private val dao: UserReviewsDao):ReviewsRepository {
+class UserUserReviewsRepositoryImpl @Inject constructor(private val dao: UserReviewsDao):UserReviewsRepository {
     override suspend fun addReview(review: UserReviewDBO) {
         dao.insert(review)
     }

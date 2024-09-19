@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         minSdk = 28
-
+        lint.targetSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.features)
     implementation(libs.navigation.ui)
+    implementation(libs.splash.screen)
     implementation(project(":core:coolshop-api"))
     implementation(project(":core:data"))
     implementation(project(":core:database"))

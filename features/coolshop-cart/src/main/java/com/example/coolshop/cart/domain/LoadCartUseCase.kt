@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class LoadCartUseCase @Inject constructor(private val repository: CartRepository){
+internal class LoadCartUseCase @Inject constructor(private val repository: CartRepository){
     fun execute(): Flow<List<CoolShopModel>> = flow {
         val data = repository.loadProductsFromDatabase()
         emit(data)

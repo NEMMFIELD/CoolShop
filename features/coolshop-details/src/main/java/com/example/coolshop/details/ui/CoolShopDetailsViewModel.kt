@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class CoolShopDetailsViewModel @Inject  constructor(
+class CoolShopDetailsViewModel @Inject internal constructor(
     private val useCase: CoolShopDetailsUseCase,
     private val addingToCartUseCase: AddingToCartUseCase,
     private val savedStateHandle: SavedStateHandle

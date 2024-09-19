@@ -1,6 +1,6 @@
 package com.example.data
 
-data class ReviewModel(
+data class UserReviewModel(
      var id: Int?,
      var user: String?,
      var review: String?,

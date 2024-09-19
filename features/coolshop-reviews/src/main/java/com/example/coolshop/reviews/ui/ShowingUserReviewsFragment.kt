@@ -5,8 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -18,14 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.reviews.data.UserReviewsAdapter
 import com.example.coolshop.reviews.databinding.FragmentShowingReviewsBinding
 import com.example.state.ApiState
-import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 
 
 @AndroidEntryPoint
-class ShowingReviewsFragment : Fragment() {
+class ShowingUserReviewsFragment : Fragment() {
     private var _binding: FragmentShowingReviewsBinding? = null
     private val binding get() = _binding
     private val viewModel: ShowUserReviewsViewModel by viewModels()
@@ -80,6 +77,6 @@ class ShowingReviewsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = ShowingReviewsFragment()
+        fun newInstance() = ShowingUserReviewsFragment()
     }
 }

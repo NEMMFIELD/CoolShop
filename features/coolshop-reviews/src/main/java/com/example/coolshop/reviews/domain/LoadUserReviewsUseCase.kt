@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class LoadUserReviewsUseCase @Inject constructor(private val repository: ReviewsRepository) {
+internal class LoadUserReviewsUseCase @Inject constructor(private val repository: UserReviewsRepository) {
     fun execute(productId:Int?) = flow {
         val mList = repository.loadReviews(productId)
         Log.d("From interactor", mList.size.toString())

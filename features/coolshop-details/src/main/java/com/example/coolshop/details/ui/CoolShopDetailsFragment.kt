@@ -16,9 +16,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.fragment.findNavController
 import coil.load
-import com.example.coolshop.details.R
 import com.example.coolshop.details.databinding.FragmentCoolShopDetailsBinding
-import com.example.coolshop.reviews.ui.AddingReviewFragment
+import com.example.coolshop.reviews.ui.AddingUserReviewFragment
 import com.example.database.models.CoolShopDBO
 import com.example.state.ApiState
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,7 +55,7 @@ class CoolShopDetailsFragment : Fragment() {
                                this?.detailsRate?.text = "Rate: ".plus(state.data.rate.toString())
                            }
                             binding?.btnAddCart?.setOnClickListener{
-                                addToCart(com.example.utils.Mapper.mapModeltoDBO(state.data))
+                                addToCart(com.example.utils.Mapper.mapModelToDBO(state.data))
                             }
                         }
                         is ApiState.Failure -> {
@@ -72,22 +71,31 @@ class CoolShopDetailsFragment : Fragment() {
         }
 
         binding?.dialogShow?.setOnClickListener {
-            val showPopUp = AddingReviewFragment()
-            bundle.putString("productId",viewModel.id)
-            showPopUp.arguments = bundle
-            showPopUp.show((activity as AppCompatActivity).supportFragmentManager,"showPopUp")
+          createDialogFragment()
         }
+
         binding?.btnShowReviews?.setOnClickListener {
-            val request = NavDeepLinkRequest.Builder
-                .fromUri("android-app://com.example.coolshop.reviews.ui/showingReviewsFragment/${viewModel.id}".toUri())
-                .build()
-            findNavController().navigate(request)
+           navigateToReviews()
         }
     }
 
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private fun createDialogFragment() {
+        val showPopUp = AddingUserReviewFragment()
+        bundle.putString("productId",viewModel.id)
+        showPopUp.arguments = bundle
+        showPopUp.show((activity as AppCompatActivity).supportFragmentManager,"showPopUp")
+    }
+
+    private fun navigateToReviews() {
+        val request = NavDeepLinkRequest.Builder
+            .fromUri("android-app://com.example.coolshop.reviews.ui/showingReviewsFragment/${viewModel.id}".toUri())
+            .build()
+        findNavController().navigate(request)
     }
 
     private fun addToCart(coolShopDBO: CoolShopDBO) {

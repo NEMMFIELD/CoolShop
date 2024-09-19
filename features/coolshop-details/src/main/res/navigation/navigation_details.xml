@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/showingReviewsFragment"
-        android:name="com.example.coolshop.reviews.ui.ShowingReviewsFragment"
+        android:name="com.example.coolshop.reviews.ui.ShowingUserReviewsFragment"
         android:label="ShowingReviewsFragment" >
     <argument
         android:name="id"

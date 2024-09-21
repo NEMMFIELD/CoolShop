@@ -1,5 +1,6 @@
 package com.example.coolshop.main.ui
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -90,8 +91,11 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
     }
 
     private fun setupRecycler() {
+        val spanCount = if (activity?.resources?.configuration?.orientation !=
+            Configuration.ORIENTATION_PORTRAIT
+        ) 4 else 2
         recyclerView = binding!!.recyclerView
-        recyclerView?.layoutManager = GridLayoutManager(requireContext(), 2)
+        recyclerView?.layoutManager = GridLayoutManager(requireContext(), spanCount)
         coolShopAdapter = CoolShopAdapter(emptyList(), this, this)
         recyclerView?.adapter = coolShopAdapter
         val itemDecoration = ItemOffsetDecoration(10)

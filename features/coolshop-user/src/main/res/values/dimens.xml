@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="user_fragment_edit_name_margin">10dp</dimen>
+    <dimen name="user_fragment_edit_name_margin_top">40dp</dimen>
+    <dimen name="user_fragment_edit_pass_margin">10dp</dimen>
+    <dimen name="user_fragment_btn_post_margin">20dp</dimen>
+    <dimen name="user_fragment_response_margin">10dp</dimen>
+    <dimen name="user_fragment_response_margin_land">10dp</dimen>
+    <dimen name="user_fragment_response_text_size">15sp</dimen>
+</resources>

@@ -11,4 +11,12 @@
     <dimen name="radius_card">5dp</dimen>
     <dimen name="padding_card">4dp</dimen>
     <dimen name="space_image">15dp</dimen>
+    <dimen name="dropdown_item_padding">14dp</dimen>
+    <dimen name="dropdown_item_size">16sp</dimen>
+    <dimen name="dromdown_item_size_land">15sp</dimen>
+    <dimen name="padding_top_text_input">16dp</dimen>
+    <dimen name="padding_bottom_text_input">16dp</dimen>
+    <dimen name="recycler_padding">10dp</dimen>
+    <dimen name="favourite_icon_width">25dp</dimen>
+    <dimen name="favourite_icon_height">25dp</dimen>
 </resources>

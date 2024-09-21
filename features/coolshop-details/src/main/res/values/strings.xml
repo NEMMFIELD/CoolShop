@@ -4,4 +4,6 @@
     <string name="add_to_cart">Add to cart</string>
     <string name="add_review">Add review</string>
     <string name="show_reviews">Show reviews</string>
+    <string name="price">Price</string>
+    <string name="rating">Rating</string>
 </resources>

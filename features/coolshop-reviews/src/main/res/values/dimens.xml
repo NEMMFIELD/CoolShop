@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="add_text_review_margin_top">10dp</dimen>
+    <dimen name="review_btn_width">150dp</dimen>
+    <dimen name="add_review_btn_margin_top">10dp</dimen>
+    <dimen name="add_review_btn_margin_start">10dp</dimen>
+    <dimen name="add_review_btn_cancel_magin_start">20dp</dimen>
+    <dimen name="show_fragment_toolbar_height">70dp</dimen>
+    <dimen name="show_fragment_btn_back_padding_bottom">5dp</dimen>
+    <dimen name="show_fragment_toolbar_title_margin_start">40dp</dimen>
+    <dimen name="show_fragment_toolbar_title_size">23sp</dimen>
+    <dimen name="show_fragment_item_container_padding">10dp</dimen>
+    <dimen name="show_fragment_item_container_margin">10dp</dimen>
+    <dimen name="show_fragment_user_mock_size">16sp</dimen>
+    <dimen name="show_fragment_user_mock_padding_start">5dp</dimen>
+    <dimen name="show_fragment_item_divider_margin_top">1dp</dimen>
+    <dimen name="fragment_show_item_commsection_margin_top">15dp</dimen>
+    <dimen name="fragment_show_comm_mock_size">17sp</dimen>
+    <dimen name="fragment_show_item_comment_margin_start">10dp</dimen>
+    <dimen name="fragment_show_item_comment_text_size">17sp</dimen>
+</resources>

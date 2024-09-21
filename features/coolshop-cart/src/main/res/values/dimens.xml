@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cart_toolbar_height">70dp</dimen>
+    <dimen name="width_image_cart">25dp</dimen>
+    <dimen name="height_image_cart">25dp</dimen>
+    <dimen name="toolbar_title_size">20sp</dimen>
+    <dimen name="margin_toolbar_cart_title">30dp</dimen>
+    <dimen name="margin_top_total_container">50dp</dimen>
+    <dimen name="margin_start_total_title">10dp</dimen>
+    <dimen name="margin_top_total_title">15dp</dimen>
+    <dimen name="margin_bottom_total_title">15dp</dimen>
+    <dimen name="total_title_size">16sp</dimen>
+    <dimen name="margin_top_total_price">15dp</dimen>
+    <dimen name="margin_end_total_price">10dp</dimen>
+    <dimen name="margin_bottom_total_price">15dp</dimen>
+    <dimen name="total_price_size">16sp</dimen>
+    <dimen name="cart_item_image_width">85dp</dimen>
+    <dimen name="cart_item_image_height">85dp</dimen>
+    <dimen name="margin_start_cart_item_image">10dp</dimen>
+    <dimen name="item_cart_title_width">210dp</dimen>
+    <dimen name="item_cart_title_size">13sp</dimen>
+    <dimen name="item_cart_title_margin_start">8dp</dimen>
+    <dimen name="item_cart_title_margin_top">6dp</dimen>
+    <dimen name="cart_item_btn_remove_margin_top">20dp</dimen>
+    <dimen name="cart_item_btn_remove_margin_end">5dp</dimen>
+    <dimen name="cart_item_btn_remove_margin_bottom">5dp</dimen>
+    <dimen name="cart_item_price_size">13sp</dimen>
+</resources>

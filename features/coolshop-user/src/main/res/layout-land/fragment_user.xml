@@ -37,7 +37,7 @@
         android:id="@+id/idTVResponse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/user_fragment_response_margin"
+        android:layout_margin="@dimen/user_fragment_response_margin_land"
         android:gravity="center_horizontal"
         android:text="Current user:"
         android:textAlignment="center"

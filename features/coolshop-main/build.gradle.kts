@@ -5,12 +5,15 @@ plugins {
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.kapt)
     alias(libs.plugins.safeargs)
-
 }
 
 android {
     namespace = "com.example.coolshop.main"
     compileSdk = 34
+
+    packaging {
+       exclude("META-INF/LICENSE.md")
+    }
 
     defaultConfig {
         minSdk = 28
@@ -46,6 +49,13 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation(libs.mockito)
+    testImplementation(libs.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     api(libs.fragment)

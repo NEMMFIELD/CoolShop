@@ -16,9 +16,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.reviews.data.UserReviewsAdapter
 import com.example.coolshop.reviews.databinding.FragmentShowingReviewsBinding
 import com.example.state.ApiState
+import com.example.utils.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -28,6 +29,8 @@ class ShowingUserReviewsFragment : Fragment() {
     private val viewModel: ShowUserReviewsViewModel by viewModels()
     private  var recyclerView: RecyclerView? = null
     private var userReviewsAdapter:UserReviewsAdapter? = null
+    @Inject
+    lateinit var logger: Logger
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,7 +53,7 @@ class ShowingUserReviewsFragment : Fragment() {
                             userReviewsAdapter?.submitList(state.data)
                         }
 
-                        is ApiState.Failure -> Log.d("TagError", "On Create ${state.message}")
+                        is ApiState.Failure -> logger.d("TagError", "On Create ${state.message}")
                         else -> {}
                     }
                 }

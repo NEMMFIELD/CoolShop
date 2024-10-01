@@ -9,6 +9,7 @@ import com.example.coolshop.main.domain.CoolShopFavouritesProductsUseCase
 import com.example.coolshop.main.domain.CoolShopProductsUseCase
 import com.example.coolshop.main.domain.LoadFavouritesProductsUseCase
 import com.example.data.CoolShopModel
+import com.example.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ internal class CoolShopViewModel @Inject internal constructor(
     private val useCaseFavourites: CoolShopFavouritesProductsUseCase,
     private val loadFavouritesProductsUseCase: LoadFavouritesProductsUseCase,
     private val categoryUseCase: CoolShopCategoryUseCase,
+    private val logger: Logger
 ) : ViewModel() {
     private val _postStateFlow: MutableStateFlow<com.example.state.ApiState<List<CoolShopModel>>> =
         MutableStateFlow(com.example.state.ApiState.Empty)
@@ -37,10 +39,13 @@ internal class CoolShopViewModel @Inject internal constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
+                    logger.d("CoolShopViewModel", "Executing useCase")
                     useCase.execute().collect { products ->
+                        Log.d("CoolShopViewModel", "Products collected: $products")
                         _postStateFlow.value = com.example.state.ApiState.Success(products)
                     }
                 } catch (e: Exception) {
+                    logger.e("CoolShopViewModel", "Error loading products", e)
                     _postStateFlow.value = com.example.state.ApiState.Failure(e)
                 }
             }
@@ -65,18 +70,15 @@ internal class CoolShopViewModel @Inject internal constructor(
         runCatching {
             useCaseFavourites.execute(coolShopModel)
         }.onFailure {
-            Log.d("Error", "setFavoutires goes wrong")
+            logger.d("Error", "setFavoutires goes wrong")
         }
-
     }
 
     internal fun loadFavourites(coolShopModel: CoolShopModel) {
-        try {
+        runCatching {
             loadFavouritesProductsUseCase.execute(coolShopModel)
-        }
-        catch (e:Exception) {
-            Log.d("Error",e.toString())
+        }.onFailure {
+            logger.d("Error",it.toString())
         }
     }
-
 }

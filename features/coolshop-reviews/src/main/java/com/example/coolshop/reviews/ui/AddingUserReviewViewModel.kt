@@ -1,6 +1,5 @@
 package com.example.coolshop.reviews.ui
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -20,16 +19,15 @@ class AddingUserReviewViewModel @Inject internal constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _User_reviewModel = MutableLiveData<UserReviewModel>()
+    private val _userReviewModel = MutableLiveData<UserReviewModel>()
     val userReviewModel: LiveData<UserReviewModel>
-        get() = _User_reviewModel
+        get() = _userReviewModel
     var id = 0
-     val productId = savedStateHandle.get<String>("productId")
+    val productId = savedStateHandle.get<String>("productId")
 
     fun addReview(reviewDBO: UserReviewDBO) {
-        Log.d("ProductId", productId.toString())
         id++
-        _User_reviewModel.value?.id = id
+        _userReviewModel.value?.id = id
         viewModelScope.launch(Dispatchers.IO) { useCase.execute(reviewDBO) }
     }
 }

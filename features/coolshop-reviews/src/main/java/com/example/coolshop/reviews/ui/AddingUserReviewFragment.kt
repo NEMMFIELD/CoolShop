@@ -1,6 +1,8 @@
 package com.example.coolshop.reviews.ui
 
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +15,14 @@ import com.example.database.models.UserReviewDBO
 import com.example.utils.Mapper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AddingUserReviewFragment : DialogFragment() {
     private var _binding: FragmentAddingReviewBinding? = null
     private val binding get() = _binding
     private val viewModel: AddingUserReviewViewModel by viewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

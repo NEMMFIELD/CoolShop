@@ -1,5 +1,6 @@
 [versions]
 agp = "8.5.2"
+coreTesting = "2.2.0"
 hiltLifecycleViewmodel = "1.0.0-alpha03"
 kotlin = "1.9.0"
 kotlin-serialization = "2.0.0"
@@ -24,17 +25,23 @@ coil = "2.7.0"
 dagger = "2.51.1"
 cardview = "1.0.0"
 datastore="1.1.1"
-navigation = "2.8.0"
-navigationFragmentKtx = "2.8.0"
-navigationUiKtx = "2.8.0"
+navigation = "2.8.1"
+navigationFragmentKtx = "2.8.1"
+navigationUiKtx = "2.8.1"
 room = "2.6.1"
 ksp = "2.0.0-1.0.21"
 logging-interceptor = "4.12.0"
 leak-canary = "2.14"
 splash-screen = "1.0.1"
+mockito = "5.13.0"
+junit-jupiter = "5.8.2"
+mockk = "1.13.12"
+robolectric = "4.8"
+coroutines-test = "1.6.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-hilt-lifecycle-viewmodel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -72,6 +79,14 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "logging-interceptor" }
 leak-canary = {module = "com.squareup.leakcanary:leakcanary-android",version.ref="leak-canary"}
 splash-screen = {module = "androidx.core:core-splashscreen",version.ref="splash-screen"}
+mockito = {module = "org.mockito:mockito-core",version.ref="mockito"}
+jupiter = {module = "org.junit.jupiter:junit-jupiter",version.ref="junit-jupiter"}
+mockk = {module = "io.mockk:mockk",version.ref = "mockk"}
+coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test",version.ref = "coroutines-test"}
+mockk-android = {module = "io.mockk:mockk-android",version.ref = "mockk"}
+kotlin-test = {module = "org.jetbrains.kotlin:kotlin-test-junit",version.ref = "kotlin"}
+robolectric = {module = "org.robolectric:robolectric", version.ref = "robolectric"}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

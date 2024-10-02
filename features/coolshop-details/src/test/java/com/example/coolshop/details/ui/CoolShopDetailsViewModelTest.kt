@@ -7,93 +7,102 @@ import com.example.coolshop.details.domain.CoolShopDetailsUseCase
 import com.example.data.CoolShopModel
 import com.example.database.models.CoolShopDBO
 import com.example.state.ApiState
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class CoolShopDetailsViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    @MockK
+    private lateinit var coolShopDetailsUseCase: CoolShopDetailsUseCase
+
+    @MockK
+    private lateinit var addingToCartUseCase: AddingToCartUseCase
+
+    private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: CoolShopDetailsViewModel
-    private val useCase: CoolShopDetailsUseCase = mockk()
-    private val addingToCartUseCase: AddingToCartUseCase = mockk()
-    private val savedStateHandle: SavedStateHandle = mockk(relaxed = true)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
-        // Инициализация ViewModel с замокированными зависимостями
-        viewModel = CoolShopDetailsViewModel(useCase, addingToCartUseCase, savedStateHandle)
+        MockKAnnotations.init(this, relaxed = true)
+        Dispatchers.setMain(testDispatcher)
+        savedStateHandle = SavedStateHandle(mapOf(CoolShopDetailsViewModel.ID to "123"))
+        viewModel = CoolShopDetailsViewModel(coolShopDetailsUseCase, addingToCartUseCase, savedStateHandle)
+    }
 
-        // Настройка savedStateHandle для возврата ID
-        every { savedStateHandle.get<String>(CoolShopDetailsViewModel.ID) } returns "1"
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun `loadSelectedProduct should emit ApiState Success when product is loaded successfully`() =
-        runTest {
-            // Arrange
-            val expectedProduct = CoolShopModel(
-                id = 1,
-                title = "Product 1",
-                imgPath = "/img1.jpg",
-                price = 100.0,
-                rate = 4.5,
-                isLiked = false,
-                description = "Product 1 description",
-                category = "Category 1"
-            )
-            every { useCase.execute("1") } returns flowOf(expectedProduct)
-
-            // Act
-            viewModel.postStateFlow.collect { state ->
-                // Assert
-                if (state is ApiState.Success) {
-                    assertEquals(expectedProduct, state.data)
-                }
-            }
-        }
-
-    @Test
-    fun `loadSelectedProduct should emit ApiState Failure when an error occurs`() = runTest {
-        // Arrange
-        val exception = Exception("Error loading product")
-        every { useCase.execute("111") } throws exception
-
-        // Act
-        viewModel.postStateFlow.collect { state ->
-            // Assert
-            if (state is ApiState.Failure) {
-                assertEquals(exception, state.message)
-            }
-        }
-    }
-
-    @Test
-    fun `addToCartProduct should call addingToCartUseCase execute`() = runTest {
-        // Arrange
-        val productToAdd = CoolShopDBO(
-            id = 1,
-            title = "Product 1",
-            imgPath = "/img1.jpg",
-            price = 100.0,
-            rate = 4.5,
-            isLiked = false,
-            description = "Product 1 description",
-            category = "Category 1"
+    fun `loadSelectedProduct should emit success when product is loaded`() = runTest {
+        // Given
+        val coolShopModel = CoolShopModel(
+            id = 123, title = "Product", imgPath = "", price = 100.0, rate = 4.5,
+            isLiked = false, description = "Test product", category = "Category"
         )
+        coEvery { coolShopDetailsUseCase.execute("123") } returns flowOf(coolShopModel)
 
-        // Act
-        viewModel.addToCardProduct(productToAdd)
+        // When
+        viewModel.loadSelectedProduct("123")
 
-        // Assert
-        coVerify { addingToCartUseCase.execute(productToAdd) }
+        // Then
+        coVerify { coolShopDetailsUseCase.execute("123") }
+        assertTrue(viewModel.postStateFlow.value is ApiState.Success)
+        assertEquals((viewModel.postStateFlow.value as ApiState.Success).data, coolShopModel)
+    }
+
+    @Test
+    fun `loadSelectedProduct should emit failure when exception is thrown`() = runTest {
+        // Given
+        val exception = Exception("Error loading product")
+        coEvery { coolShopDetailsUseCase.execute("123") } throws exception
+
+        // When
+        viewModel.loadSelectedProduct("123")
+
+        // Then
+        coVerify { coolShopDetailsUseCase.execute("123") }
+        assertTrue(viewModel.postStateFlow.value is ApiState.Failure)
+        assertEquals((viewModel.postStateFlow.value as ApiState.Failure).message, exception)
+    }
+
+    @Test
+    fun `addToCardProduct should call addingToCartUseCase`() = runTest {
+        // Given
+        val coolShopDBO = CoolShopDBO(
+            id = 1, title = "Product", imgPath = "", price = 100.0, rate = 4.5,
+            isLiked = false, description = "Test product", category = "Category"
+        )
+        coEvery { addingToCartUseCase.execute(coolShopDBO) } just Runs
+
+        // When
+        viewModel.addToCardProduct(coolShopDBO)
+
+        // Then
+        coVerify { addingToCartUseCase.execute(coolShopDBO) }
     }
 }

@@ -2,9 +2,12 @@ package com.example.coolshop.reviews.domain
 
 import android.util.Log
 import com.example.database.models.UserReviewDBO
+import com.example.utils.Logger
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
@@ -23,12 +26,15 @@ import kotlin.test.assertEquals
 class LoadUserReviewsUseCaseTest {
     private lateinit var repository: UserReviewsRepository
     private lateinit var useCase: LoadUserReviewsUseCase
+    private lateinit var logger: Logger
 
     @Before
     fun setUp() {
         // Мокаем репозиторий
         repository = mockk()
-        useCase = LoadUserReviewsUseCase(repository)
+        logger = mockk<Logger>()
+        every { logger.e(any(), any(), any()) } just Runs
+        useCase = LoadUserReviewsUseCase(repository,logger)
 
         // Мокаем статический метод Log.d
         mockkStatic(Log::class)

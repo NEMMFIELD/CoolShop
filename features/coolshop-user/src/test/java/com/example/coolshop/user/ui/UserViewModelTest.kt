@@ -8,8 +8,14 @@ import com.example.coolshop.api.models.LoginRequest
 import com.example.coolshop.api.models.RegistrationResponse
 import com.example.coolshop.user.domain.LoginUseCase
 import com.example.coolshop.user.domain.SaveTokenUseCase
+import com.example.utils.Logger
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
@@ -18,6 +24,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
@@ -39,125 +46,92 @@ class UserViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var viewModel: UserViewModel
+    @MockK
     private lateinit var loginUseCase: LoginUseCase
+
+    @MockK
     private lateinit var saveTokenUseCase: SaveTokenUseCase
 
-    private val testDispatcher = StandardTestDispatcher()
+    @MockK
+    private lateinit var logger: Logger
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    private lateinit var userViewModel: UserViewModel
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @Before
-    fun setup() {
+    fun setUp() {
+        MockKAnnotations.init(this, relaxed = true)
         Dispatchers.setMain(testDispatcher)
-        // Mock LoginUseCase and SaveTokenUseCase
-        loginUseCase = mockk()
-        saveTokenUseCase = mockk()
-
-        // Initialize the ViewModel
-        viewModel = UserViewModel(loginUseCase, saveTokenUseCase)
+        userViewModel = UserViewModel(loginUseCase, saveTokenUseCase, logger)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
-        Dispatchers.resetMain() // Reset to avoid affecting other tests
-        unmockkAll() // Unmock all mocks
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun `login should set token when login is successful`() = runTest {
-        // Mock a successful login response
-        val loginRequest = LoginRequest("username", "password")
-        val expectedToken = "test_token"
+    fun `login should update token on success`() = runTest {
+        // Given
+        val loginRequest = LoginRequest("user", "password")
+        val expectedToken = "testToken"
         coEvery { loginUseCase.execute(loginRequest) } returns RegistrationResponse(expectedToken)
 
-        // Call login
-        viewModel.login(loginRequest)
+        val observer = mockk<Observer<String>>(relaxed = true)
+        userViewModel.token.observeForever(observer)
 
-        // Advance time to ensure coroutines complete
-        testDispatcher.scheduler.advanceUntilIdle()
+        // When
+        userViewModel.login(loginRequest)
 
-        // Assert the token is set correctly
-        assertEquals(expectedToken, viewModel.token.getOrAwaitValue())
+        // Then
+        coVerify { loginUseCase.execute(loginRequest) }
+        assertEquals(expectedToken, userViewModel.token.value)
+        verify { observer.onChanged(expectedToken) }
+
+        userViewModel.token.removeObserver(observer)
     }
 
     @Test
-    fun `login should handle exception when login fails`() = runBlockingTest {
-        // Arrange
-        val loginRequest = LoginRequest("username", "password")
-        val exception = Exception("Login failed")
-
-        // Mock the use case to throw an exception
+    fun `login should log error on exception`() = runTest {
+        // Given
+        val loginRequest = LoginRequest("user", "password")
+        val exception = Exception("Login error")
         coEvery { loginUseCase.execute(loginRequest) } throws exception
 
-        // Mock Log.d using MockK
-        mockkStatic(Log::class)
+        // When
+        userViewModel.login(loginRequest)
 
-        // Act
-        viewModel.login(loginRequest)
-
-        // Assert
-        // Проверка, что Log.d был вызван с ожидаемыми параметрами
-        verify { Log.d("Error", "Error from login: $exception") }
-
-        // Проверка, что токен остается пустым в случае ошибки
-        assertNull(viewModel.token.value)
-
-        // Close the static mock to prevent memory leaks
-        unmockkStatic(Log::class)
+        // Then
+        coVerify { loginUseCase.execute(loginRequest) }
+        verify { logger.d("Error", "Error from login:${exception}") }
     }
 
     @Test
-    fun `saveToken should call saveTokenUseCase`() = runTest {
-        // Define token to save
-        val tokenToSave = "test_token"
+    fun `saveToken should call saveTokenUseCase on success`() = runTest {
+        // Given
+        val token = "testToken"
+        coEvery { saveTokenUseCase.execute(token) } just Runs
 
-        // Call saveToken
-        viewModel.saveToken(tokenToSave)
+        // When
+        userViewModel.saveToken(token)
 
-        // Advance time to ensure coroutines complete
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify that saveTokenUseCase was called with the correct token
-        coVerify { saveTokenUseCase.execute(tokenToSave) }
+        // Then
+        coVerify { saveTokenUseCase.execute(token) }
     }
 
     @Test
-    fun `saveToken should handle exception when saving token fails`() = runTest {
-        // Mock an exception from saveTokenUseCase
-        val tokenToSave = "test_token"
-        val exception = Exception("Save token failed")
-        coEvery { saveTokenUseCase.execute(tokenToSave) } throws exception
+    fun `saveToken should log error on exception`() = runTest {
+        // Given
+        val token = "testToken"
+        val exception = Exception("Save token error")
+        coEvery { saveTokenUseCase.execute(token) } throws exception
 
-        // Call saveToken
-        viewModel.saveToken(tokenToSave)
+        // When
+        userViewModel.saveToken(token)
 
-        // Advance time to ensure coroutines complete
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify that saveTokenUseCase was called
-        coVerify { saveTokenUseCase.execute(tokenToSave) }
-        // Optionally verify that the error was logged (requires additional setup to capture logs)
-    }
-
-    fun <T> LiveData<T>.getOrAwaitValue(): T {
-        var data: T? = null
-        val latch = CountDownLatch(1)
-
-        val observer = object : Observer<T> {
-            override fun onChanged(value: T) {
-                data = value
-                latch.countDown()
-                this@getOrAwaitValue.removeObserver(this)
-            }
-        }
-
-        this.observeForever(observer)
-
-        // Wait to get the value.
-        latch.await(2, TimeUnit.SECONDS)
-
-        @Suppress("UNCHECKED_CAST")
-        return data as T
+        // Then
+        coVerify { saveTokenUseCase.execute(token) }
+        verify { logger.d("Error", "Error from save token:${exception}") }
     }
 }

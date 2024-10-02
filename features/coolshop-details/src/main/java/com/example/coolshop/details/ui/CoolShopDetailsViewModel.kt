@@ -35,7 +35,7 @@ class CoolShopDetailsViewModel @Inject internal constructor(
         loadSelectedProduct(id.toString())
     }
 
-    private fun loadSelectedProduct(id: String) {
+     fun loadSelectedProduct(id: String) {
         viewModelScope.launch {
             try {
                 useCase.execute(id).collect { product ->

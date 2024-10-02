@@ -4,8 +4,11 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import com.example.coolshop.reviews.domain.AddUserReviewUseCase
 import com.example.database.models.UserReviewDBO
+import com.example.utils.Logger
+import io.mockk.Runs
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,8 +36,10 @@ class AddingUserReviewViewModelTest {
     private val useCase: AddUserReviewUseCase = mockk(relaxed = true) // Мокаем useCase
     private val savedStateHandle: SavedStateHandle = mockk() // Мокаем SavedStateHandle
 
+
     @Before
     fun setUp() {
+
         every { savedStateHandle.get<String>("productId") } returns "123" // Мокаем возврат значения productId
         viewModel = AddingUserReviewViewModel(useCase, savedStateHandle)
     }

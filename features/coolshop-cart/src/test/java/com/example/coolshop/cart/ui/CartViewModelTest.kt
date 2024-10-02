@@ -6,12 +6,22 @@ import com.example.coolshop.cart.domain.ProductObserveUseCase
 import com.example.coolshop.cart.domain.RemoveItemFromCartUseCase
 import com.example.coolshop.cart.domain.TotalPriceUseCase
 import com.example.database.models.CoolShopDBO
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -23,90 +33,85 @@ class CartViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    @MockK
+    private lateinit var removeItemFromCartUseCase: RemoveItemFromCartUseCase
+
+    @MockK
+    private lateinit var productObserveUseCase: ProductObserveUseCase
+
+    @MockK
+    private lateinit var totalPriceUseCase: TotalPriceUseCase
+
     private lateinit var viewModel: CartViewModel
-    private val removeItem: RemoveItemFromCartUseCase = mockk()
-    private val observedProductObserveUseCase: ProductObserveUseCase = mockk()
-    private val totalPriceUseCase: TotalPriceUseCase = mockk()
-    private val observerProduct: Observer<List<CoolShopDBO>> = mockk(relaxed = true)
-    private val observerPrice: Observer<Double?> = mockk(relaxed = true)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
-        // Инициализация ViewModel с замокированными зависимостями
-        viewModel = CartViewModel(removeItem, observedProductObserveUseCase, totalPriceUseCase)
+        MockKAnnotations.init(this, relaxed = true)
+        Dispatchers.setMain(testDispatcher)
 
-        // Присоединение наблюдателей к LiveData
-        viewModel.cartedProducts.observeForever(observerProduct)
-        viewModel.totalPrice.observeForever(observerPrice)
+        // Замокируем потоки, возвращаемые useCase
+        every { productObserveUseCase.observedProduct } returns flowOf(listOf(CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category")))
+        every { totalPriceUseCase.observedTotalPrice } returns flowOf(100.0)
 
-        // Настройка мока для observedProduct
-        every { observedProductObserveUseCase.observedProduct } returns flowOf(emptyList())
-    }
-
-    @Test
-    fun `removeItem should call removeItem use case`() = runTest {
-        // Arrange
-        val productToRemove = CoolShopDBO(
-            id = 1,
-            title = "Product 1",
-            price = 10.0,
-            category = "electronics",
-            description = "Description",
-            isLiked = false,
-            rate = 4.5,
-            imgPath = "vkontakte/img"
-        )
-
-        // Act
-        viewModel.removeItem(productToRemove)
-
-        // Assert
-        coVerify { removeItem.execute(productToRemove) }
-    }
-
-    @Test
-    fun `cartedProducts LiveData should update correctly`() {
-        // Arrange
-        val expectedProducts = listOf(
-            CoolShopDBO(
-                id = 1,
-                title = "Product 1",
-                price = 10.0,
-                category = "electronics",
-                description = "Description",
-                isLiked = false,
-                rate = 4.5,
-                imgPath = "vkontakte/img"
-            )
-        )
-        every { observedProductObserveUseCase.observedProduct } returns flowOf(expectedProducts)
-
-        // Act
-        viewModel.cartedProducts.observeForever(observerProduct)
-
-        // Assert
-        assertEquals(expectedProducts, viewModel.cartedProducts.value)
-        verify { observerProduct.onChanged(expectedProducts) }
-    }
-
-    @Test
-    fun `totalPrice LiveData should update correctly`() {
-        // Arrange
-        val expectedPrice: Double? = 100.0 // Убедитесь, что здесь используется правильный тип
-        every { totalPriceUseCase.observedTotalPrice } returns flowOf(expectedPrice)
-
-        // Act
-        viewModel.totalPrice.observeForever(observerPrice)
-
-        // Assert
-        assertEquals(expectedPrice, viewModel.totalPrice.value)
-        verify { observerPrice.onChanged(expectedPrice) }
+        // Создаем ViewModel
+        viewModel = CartViewModel(removeItemFromCartUseCase, productObserveUseCase, totalPriceUseCase)
     }
 
     @After
     fun tearDown() {
-        // Удаление наблюдателей
-        viewModel.cartedProducts.removeObserver(observerProduct)
-        viewModel.totalPrice.removeObserver(observerPrice)
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `cartedProducts should observe products from ProductObserveUseCase`() = runTest {
+        // Given
+        val observer = mockk<Observer<List<CoolShopDBO>>>(relaxed = true)
+        viewModel.cartedProducts.observeForever(observer)
+
+        // When
+        val slot = slot<List<CoolShopDBO>>()
+        val expectedProducts = listOf(CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category"))
+
+        // Then
+        verify { observer.onChanged(capture(slot)) }
+
+        // Compare objects by fields instead of reference
+        assertEquals(expectedProducts.size, slot.captured.size)
+        assertEquals(expectedProducts[0].id, slot.captured[0].id)
+        assertEquals(expectedProducts[0].title, slot.captured[0].title)
+        assertEquals(expectedProducts[0].price, slot.captured[0].price)
+
+        viewModel.cartedProducts.removeObserver(observer)
+    }
+
+    @Test
+    fun `totalPrice should observe total price from TotalPriceUseCase`() = runTest {
+        // Given
+        val observer = mockk<Observer<Double?>>(relaxed = true)
+        viewModel.totalPrice.observeForever(observer)
+
+        // When
+        val expectedPrice = 100.0
+
+        // Then
+        verify { observer.onChanged(expectedPrice) }
+        assertEquals(expectedPrice, viewModel.totalPrice.value)
+
+        viewModel.totalPrice.removeObserver(observer)
+    }
+
+    @Test
+    fun `removeItem should call removeItemFromCartUseCase`() = runTest {
+        // Given
+        val product = CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category")
+        coEvery { removeItemFromCartUseCase.execute(product) } just Runs
+
+        // When
+        viewModel.removeItem(product)
+
+        // Then
+        coVerify { removeItemFromCartUseCase.execute(product) }
     }
 }

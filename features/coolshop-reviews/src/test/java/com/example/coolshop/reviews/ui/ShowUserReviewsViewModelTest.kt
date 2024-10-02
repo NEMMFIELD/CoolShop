@@ -7,6 +7,7 @@ import com.example.coolshop.reviews.domain.LoadUserReviewsUseCase
 import com.example.data.UserReviewModel
 import com.example.database.models.UserReviewDBO
 import com.example.state.ApiState
+import com.example.utils.Logger
 import com.example.utils.Mapper
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -48,7 +49,7 @@ class ShowUserReviewsViewModelTest {
     private lateinit var viewModel: ShowUserReviewsViewModel
     private lateinit var loadUserReviewsUseCase: LoadUserReviewsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
-    private lateinit var logger:Logger
+    private lateinit var logger: Logger
 
     @Before
     fun setUp() {

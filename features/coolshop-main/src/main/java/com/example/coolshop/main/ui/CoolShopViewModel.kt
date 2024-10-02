@@ -1,7 +1,5 @@
 package com.example.coolshop.main.ui
 
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coolshop.main.domain.CoolShopCategoryUseCase
@@ -39,9 +37,7 @@ internal class CoolShopViewModel @Inject internal constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
-                    logger.d("CoolShopViewModel", "Executing useCase")
                     useCase.execute().collect { products ->
-                        Log.d("CoolShopViewModel", "Products collected: $products")
                         _postStateFlow.value = com.example.state.ApiState.Success(products)
                     }
                 } catch (e: Exception) {
@@ -52,7 +48,7 @@ internal class CoolShopViewModel @Inject internal constructor(
         }
     }
 
-    internal fun loadCategoryProducts(category:String) {
+    internal fun loadCategoryProducts(category: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -78,7 +74,7 @@ internal class CoolShopViewModel @Inject internal constructor(
         runCatching {
             loadFavouritesProductsUseCase.execute(coolShopModel)
         }.onFailure {
-            logger.d("Error",it.toString())
+            logger.d("Error", it.toString())
         }
     }
 }

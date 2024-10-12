@@ -1,6 +1,5 @@
 package com.example.coolshop.reviews.ui
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +11,9 @@ import com.example.utils.Mapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,16 +26,19 @@ class ShowUserReviewsViewModel @Inject internal constructor(
 
     private val _reviewsStateFlow: MutableStateFlow<ApiState<List<UserReviewModel>>> =
         MutableStateFlow(ApiState.Empty)
-    val reviewsStateFlow get() = _reviewsStateFlow
+    val reviewsStateFlow
+        get() = _reviewsStateFlow
+            .onStart { loadReviews(productId?.toInt()) }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000L),
+                ApiState.Empty
+            )
 
     val productId = savedStateHandle.get<String>(PRODUCT_ID)
 
     companion object {
         const val PRODUCT_ID = "id"
-    }
-
-    init {
-        loadReviews(productId?.toInt() ?: 0)
     }
 
     internal fun loadReviews(productId: Int?) {
@@ -52,7 +57,7 @@ class ShowUserReviewsViewModel @Inject internal constructor(
                     _reviewsStateFlow.value = ApiState.Success(reviewsList)
                 }
             } catch (e: Exception) {
-               logger.e("ShowUserReviewsViewModel", "Error loading reviews", e)
+                logger.e("ShowUserReviewsViewModel", "Error loading reviews", e)
                 _reviewsStateFlow.value = ApiState.Failure(e)
             }
         }

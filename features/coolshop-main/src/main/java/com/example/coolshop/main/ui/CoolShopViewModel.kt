@@ -7,11 +7,15 @@ import com.example.coolshop.main.domain.CoolShopFavouritesProductsUseCase
 import com.example.coolshop.main.domain.CoolShopProductsUseCase
 import com.example.coolshop.main.domain.LoadFavouritesProductsUseCase
 import com.example.data.CoolShopModel
+import com.example.state.ApiState
 import com.example.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,14 +28,16 @@ internal class CoolShopViewModel @Inject internal constructor(
     private val categoryUseCase: CoolShopCategoryUseCase,
     private val logger: Logger
 ) : ViewModel() {
-    private val _postStateFlow: MutableStateFlow<com.example.state.ApiState<List<CoolShopModel>>> =
-        MutableStateFlow(com.example.state.ApiState.Empty)
-    val postStateFlow: StateFlow<com.example.state.ApiState<List<CoolShopModel>>>
-        get() = _postStateFlow
+    private val _postStateFlow: MutableStateFlow<ApiState<List<CoolShopModel>>> =
+        MutableStateFlow(ApiState.Empty)
+    val postStateFlow: StateFlow<ApiState<List<CoolShopModel>>> = _postStateFlow
+            .onStart { loadProducts() }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000L),
+                ApiState.Empty
+            )
 
-    init {
-        loadProducts()
-    }
 
     internal fun loadProducts() {
         viewModelScope.launch {

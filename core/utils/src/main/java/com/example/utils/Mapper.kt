@@ -50,12 +50,14 @@ class Mapper {
             )
         }
 
-        fun mapReviewDBOToReview(reviewDBO: UserReviewDBO): UserReviewModel = UserReviewModel(
-            id = reviewDBO.reviewId,
-            user = reviewDBO.userName,
-            review = reviewDBO.review,
-            productId = reviewDBO.productId
-        )
+        fun mapReviewDBOToReview(dbo: UserReviewDBO): UserReviewModel {
+            return UserReviewModel(
+                id = dbo.reviewId ?: 0,
+                user = dbo.userName ?: "Unknown",
+                review = dbo.review ?: "",
+                productId = dbo.productId ?: 0
+            )
+        }
 
         fun mapReviewModelToReviewDbo(review: UserReviewModel): UserReviewDBO = UserReviewDBO(
             userName = review.user,

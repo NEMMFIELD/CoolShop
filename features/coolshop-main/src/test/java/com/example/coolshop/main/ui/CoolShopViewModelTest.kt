@@ -12,13 +12,19 @@ import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -31,38 +37,29 @@ import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class CoolShopViewModelTest {
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
-
-    @MockK
-    private lateinit var coolShopProductsUseCase: CoolShopProductsUseCase
-
-    @MockK
-    private lateinit var coolShopFavouritesProductsUseCase: CoolShopFavouritesProductsUseCase
-
-    @MockK
-    private lateinit var loadFavouritesProductsUseCase: LoadFavouritesProductsUseCase
-
-    @MockK
-    private lateinit var coolShopCategoryUseCase: CoolShopCategoryUseCase
-
-    @MockK
-    private lateinit var logger: Logger
-
     private lateinit var viewModel: CoolShopViewModel
-    private val testDispatcher = UnconfinedTestDispatcher()
+
+    // Mocked dependencies
+    private val mockUseCase: CoolShopProductsUseCase = mockk()
+    private val mockUseCaseFavourites: CoolShopFavouritesProductsUseCase = mockk()
+    private val mockLoadFavouritesProductsUseCase: LoadFavouritesProductsUseCase = mockk()
+    private val mockCategoryUseCase: CoolShopCategoryUseCase = mockk()
+    private val mockLogger: Logger = mockk(relaxed = true) // Relaxed to allow logging without explicit stubbing
+
+    // Test dispatcher for coroutines
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
-        MockKAnnotations.init(this, relaxed = true)
         Dispatchers.setMain(testDispatcher)
+
+        // Initialize the ViewModel with mocked dependencies
         viewModel = CoolShopViewModel(
-            coolShopProductsUseCase,
-            coolShopFavouritesProductsUseCase,
-            loadFavouritesProductsUseCase,
-            coolShopCategoryUseCase,
-            logger
+            useCase = mockUseCase,
+            useCaseFavourites = mockUseCaseFavourites,
+            loadFavouritesProductsUseCase = mockLoadFavouritesProductsUseCase,
+            categoryUseCase = mockCategoryUseCase,
+            logger = mockLogger
         )
     }
 
@@ -72,111 +69,121 @@ class CoolShopViewModelTest {
     }
 
     @Test
-    fun `loadProducts should emit success when products are loaded`() = runTest {
+    fun `loadProducts() should emit Success state when useCase returns products`() = runTest {
         // Given
-        val products = listOf(
-            CoolShopModel(
-                id = 1,
-                title = "Product 1",
-                imgPath = "",
-                price = 100.0,
-                rate = 4.5,
-                isLiked = false,
-                description = "Test Product",
-                category = "Category"
-            )
-        )
-        coEvery { coolShopProductsUseCase.execute() } returns flowOf(products)
+        val products = listOf(mockk<CoolShopModel>())
+        every { mockUseCase.execute() } returns flowOf(products)
 
-        // When
+        // Когда
+        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+
+        // Собираем данные из поста
+        val job = launch {
+            viewModel.postStateFlow.collect {
+                states.add(it) // Добавляем каждое изменение состояния
+            }
+        }
+
+        // Явно вызываем загрузку продуктов
         viewModel.loadProducts()
 
-        // Then
-        coVerify { coolShopProductsUseCase.execute() }
-        assertEquals(ApiState.Success(products), viewModel.postStateFlow.value)
+        // Ожидаем завершения корутин
+        advanceUntilIdle()
+
+        // Проверяем, что состояние изменилось с Empty на Success
+        assertEquals(listOf(ApiState.Empty, ApiState.Success(products)), states)
+
+        job.cancel() // Останавливаем сбор данных
+
+        // Проверяем, что useCase был вызван
+        verify { mockUseCase.execute() }
+        confirmVerified(mockUseCase)
     }
 
     @Test
-    fun `loadProducts should emit failure when exception is thrown`() = runTest {
+    fun `loadProducts() should emit Failure state when useCase throws exception`() = runTest {
         // Given
-        val exception = Exception("Error loading products")
-        coEvery { coolShopProductsUseCase.execute() } throws exception
+        val exception = Exception("Failed to load products")
 
-        // When
+        // Устанавливаем, что useCase выбрасывает исключение при вызове execute()
+        every { mockUseCase.execute() } throws exception
+
+        // Когда
+        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+
+        // Собираем изменения в postStateFlow
+        val job = launch {
+            viewModel.postStateFlow.collect { state ->
+                states.add(state) // Добавляем каждое изменение состояния в список
+            }
+        }
+
+        // Явно вызываем метод loadProducts(), который должен привести к ошибке
         viewModel.loadProducts()
 
-        // Then
-        coVerify { coolShopProductsUseCase.execute() }
-        assertEquals(ApiState.Failure(exception), viewModel.postStateFlow.value)
+        // Ожидаем завершения всех корутин
+        advanceUntilIdle()
+
+        // Тогда: проверяем, что после Empty должно произойти изменение на Failure
+        assertEquals(listOf(ApiState.Empty, ApiState.Failure(exception)), states)
+
+        // Останавливаем сбор данных
+        job.cancel()
+
+        // Проверяем, что logger был вызван для обработки ошибки
+        verify { mockLogger.e("CoolShopViewModel", "Error loading products", exception) }
     }
 
     @Test
-    fun `loadCategoryProducts should emit success when category products are loaded`() = runTest {
+    fun `loadCategoryProducts() should emit Success state when categoryUseCase returns products`() = runTest {
         // Given
-        val category = "electronics"
-        val products = listOf(
-            CoolShopModel(
-                id = 1,
-                title = "Product 1",
-                imgPath = "",
-                price = 100.0,
-                rate = 4.5,
-                isLiked = false,
-                description = "Test Product",
-                category = category
-            )
-        )
-        coEvery { coolShopCategoryUseCase.execute(category) } returns flowOf(products)
-
+        val category = "Electronics"
+        val products = listOf(mockk<CoolShopModel>())
+        every { mockCategoryUseCase.execute(category) } returns flowOf(products)
+        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+        val job = launch {
+            viewModel.postStateFlow.collect { state ->
+                states.add(state)
+            }
+        }
         // When
         viewModel.loadCategoryProducts(category)
 
+        // Advance time to allow coroutine to complete
+        advanceUntilIdle()
+
         // Then
-        coVerify { coolShopCategoryUseCase.execute(category) }
         assertEquals(ApiState.Success(products), viewModel.postStateFlow.value)
+        job.cancel()
+        verify { mockCategoryUseCase.execute(category) }
+        confirmVerified(mockCategoryUseCase)
     }
 
     @Test
-    fun `setFavourites should call favourites use case`() = runTest {
+    fun `setFavourites() should execute useCaseFavourites`() {
         // Given
-        val product = CoolShopModel(
-            id = 1,
-            title = "Product 1",
-            imgPath = "",
-            price = 100.0,
-            rate = 4.5,
-            isLiked = false,
-            description = "Test Product",
-            category = "Category"
-        )
-        coEvery { coolShopFavouritesProductsUseCase.execute(product) } just Runs
+        val product = mockk<CoolShopModel>()
+        every { mockUseCaseFavourites.execute(product) } just Runs
 
         // When
         viewModel.setFavourites(product)
 
         // Then
-        verify { coolShopFavouritesProductsUseCase.execute(product) }
+        verify { mockUseCaseFavourites.execute(product) }
+        confirmVerified(mockUseCaseFavourites)
     }
 
     @Test
-    fun `loadFavourites should call load favourites use case`() = runTest {
+    fun `loadFavourites() should execute loadFavouritesProductsUseCase`() {
         // Given
-        val product = CoolShopModel(
-            id = 1,
-            title = "Product 1",
-            imgPath = "",
-            price = 100.0,
-            rate = 4.5,
-            isLiked = false,
-            description = "Test Product",
-            category = "Category"
-        )
-        coEvery { loadFavouritesProductsUseCase.execute(product) } just Runs
+        val product = mockk<CoolShopModel>()
+        every { mockLoadFavouritesProductsUseCase.execute(product) } just Runs
 
         // When
         viewModel.loadFavourites(product)
 
         // Then
-        verify { loadFavouritesProductsUseCase.execute(product) }
+        verify { mockLoadFavouritesProductsUseCase.execute(product) }
+        confirmVerified(mockLoadFavouritesProductsUseCase)
     }
 }

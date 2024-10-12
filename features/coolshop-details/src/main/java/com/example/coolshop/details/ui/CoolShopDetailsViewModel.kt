@@ -11,7 +11,10 @@ import com.example.state.ApiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,18 +27,20 @@ class CoolShopDetailsViewModel @Inject internal constructor(
 ) : ViewModel() {
     private val _postStateFlow: MutableStateFlow<ApiState<CoolShopModel>> =
         MutableStateFlow(ApiState.Empty)
-    val postStateFlow: StateFlow<ApiState<CoolShopModel>>
-        get() = _postStateFlow
-     val id = savedStateHandle.get<String>(ID)
+    val postStateFlow: StateFlow<ApiState<CoolShopModel>> = _postStateFlow
+        .onStart { loadSelectedProduct(id.toString()) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            ApiState.Empty
+        )
+    val id = savedStateHandle.get<String>(ID)
+
     companion object {
         const val ID = "id"
     }
 
-    init {
-        loadSelectedProduct(id.toString())
-    }
-
-     fun loadSelectedProduct(id: String) {
+    fun loadSelectedProduct(id: String) {
         viewModelScope.launch {
             try {
                 useCase.execute(id).collect { product ->
@@ -47,7 +52,7 @@ class CoolShopDetailsViewModel @Inject internal constructor(
         }
     }
 
-     fun addToCardProduct(coolShopDBO: CoolShopDBO) {
+    fun addToCardProduct(coolShopDBO: CoolShopDBO) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 addingToCartUseCase.execute(coolShopDBO)

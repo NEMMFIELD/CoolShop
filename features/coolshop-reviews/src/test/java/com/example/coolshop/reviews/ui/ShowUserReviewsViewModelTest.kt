@@ -1,6 +1,5 @@
 package com.example.coolshop.reviews.ui
 
-import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import com.example.coolshop.reviews.domain.LoadUserReviewsUseCase
@@ -9,23 +8,18 @@ import com.example.database.models.UserReviewDBO
 import com.example.state.ApiState
 import com.example.utils.Logger
 import com.example.utils.Mapper
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.just
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -33,105 +27,119 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-
-@OptIn(ExperimentalCoroutinesApi::class)
 class ShowUserReviewsViewModelTest {
-
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    val instantExecutorRule = InstantTaskExecutorRule()
+
+    private val testDispatcher = StandardTestDispatcher()
+
+    @RelaxedMockK
+    private lateinit var mockLoadUserReviewsUseCase: LoadUserReviewsUseCase
+
+    @RelaxedMockK
+    private lateinit var mockSavedStateHandle: SavedStateHandle
+
+    @RelaxedMockK
+    private lateinit var mockLogger: Logger
 
     private lateinit var viewModel: ShowUserReviewsViewModel
-    private lateinit var loadUserReviewsUseCase: LoadUserReviewsUseCase
-    private lateinit var savedStateHandle: SavedStateHandle
-    private lateinit var logger: Logger
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
-    fun setUp() {
-        loadUserReviewsUseCase = mockk()
-        savedStateHandle = SavedStateHandle(mapOf(ShowUserReviewsViewModel.PRODUCT_ID to "1"))
+    fun setup() {
+        MockKAnnotations.init(this)
+        Dispatchers.setMain(testDispatcher)
 
-        // Инициализация viewModel
-         logger = mockk<Logger>()
-        every { logger.e(any(), any(), any()) } just Runs
-        // Инициализируем ViewModel с замокированным логгером
-        viewModel = ShowUserReviewsViewModel(loadUserReviewsUseCase, savedStateHandle, logger)
+        // Настраиваем возвращаемое значение для productId
+        every { mockSavedStateHandle.get<String>(ShowUserReviewsViewModel.PRODUCT_ID) } returns "123"
+
+        // Создаем экземпляр ViewModel
+        viewModel =
+            ShowUserReviewsViewModel(mockLoadUserReviewsUseCase, mockSavedStateHandle, mockLogger)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
-        unmockkAll()
+        Dispatchers.resetMain() // Сбрасываем основной диспетчер
+        clearAllMocks() // Очищаем моки
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `loadReviews() should emit Success state when reviews are loaded`() = runTest {
-        // Мокируем успешный результат из useCase
-        val mockReviewDBOs = listOf(mockk<UserReviewDBO>()) // Мокируем UserReviewDBO
-        val mockReviewModels = mockReviewDBOs.map { mockk<UserReviewModel>() } // Маппинг UserReviewModel
+    fun `loadReviews() should emit Success state when useCase returns reviews`() = runTest {
+        // Given: создаем мок UserReviewDBO и настраиваем его поля
+        val reviewDBO = mockk<UserReviewDBO> {
+            every { reviewId } returns 1
+            every { userName } returns "Test User"
+            every { review } returns "This is a test review"
+            every { productId } returns 123
+        }
 
-        // Мокаем маппинг UserReviewDBO -> UserReviewModel
-        mockkObject(Mapper)
-        every { Mapper.mapReviewDBOToReview(any()) } returns mockReviewModels.first()
+        // Создаем список UserReviewDBO
+        val reviewsDBO = listOf(reviewDBO)
 
-        // Мокаем результат UseCase для UserReviewDBO
-        coEvery { loadUserReviewsUseCase.execute(1) } returns flowOf(mockReviewDBOs)
+        // Мокаем выполнение useCase для возврата потока с объектами UserReviewDBO
+        every { mockLoadUserReviewsUseCase.execute(123) } returns flowOf(reviewsDBO)
 
-        // Запускаем загрузку отзывов
-        viewModel.loadReviews(1)
+        // Когда: вызываем метод loadReviews
+        viewModel.loadReviews(123)
 
-        // Проверяем результат
-        val state = viewModel.reviewsStateFlow.first() // Считываем первое значение из StateFlow
-        assertTrue(state is ApiState.Success)
-        assertEquals(mockReviewModels, (state as ApiState.Success).data)
+        // Используем collect для асинхронного получения состояния
+        var emittedState: ApiState<List<UserReviewModel>>? = null
+        val job = launch {
+            viewModel.reviewsStateFlow.collect { state ->
+                emittedState = state // Сохраняем текущее состояние
+            }
+        }
 
-        // Проверяем, что маппер был вызван для каждого DBO
-        verify { Mapper.mapReviewDBOToReview(any()) }
+        // Завершаем корутины
+        advanceUntilIdle()
+        job.cancel() // Завершаем коллекцию после завершения теста
+
+        // Отладка: вывод текущего состояния
+        println("Emitted state: $emittedState")
+
+        // Then: проверяем, что состояние изменилось на Success с преобразованными отзывами
+        val expectedReviews = reviewsDBO.map { Mapper.mapReviewDBOToReview(it) }
+        assertEquals(ApiState.Success(expectedReviews), emittedState)
+
+        verify { mockLoadUserReviewsUseCase.execute(123) } // Проверяем вызов useCase
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `loadReviews() should emit Failure state when useCase throws exception`() = runTest {
-        // Мокируем выброс исключения из UseCase
-        val exception = Exception("Network error")
-        coEvery { loadUserReviewsUseCase.execute(1) } throws exception
+        // Given: создаем исключение
+        val exception = Exception("Failed to load reviews")
 
-        // Запускаем загрузку отзывов
-        viewModel.loadReviews(1)
+        // Мокаем выполнение useCase для возврата исключения
+        every { mockLoadUserReviewsUseCase.execute(123) } returns flow { throw exception }
 
-        // Проверяем результат
-        val state = viewModel.reviewsStateFlow.first() // Считываем первое значение из StateFlow
-        assertTrue(state is ApiState.Failure)
-        assertEquals(exception, (state as ApiState.Failure).message)
-    }
+        // Когда: вызываем метод loadReviews
+        viewModel.loadReviews(123)
 
-    @Test
-    fun `init should load reviews using productId from SavedStateHandle`() = runTest {
-        // Мокируем успешный результат из useCase
-        val mockReviewDBOs = listOf(mockk<UserReviewDBO>())
-        coEvery { loadUserReviewsUseCase.execute(1) } returns flowOf(mockReviewDBOs)
+        // Используем collect для асинхронного получения состояния
+        var emittedState: ApiState<List<UserReviewModel>>? = null
+        val job = launch {
+            viewModel.reviewsStateFlow.collect { state ->
+                emittedState = state // Сохраняем текущее состояние
+            }
+        }
 
-        // Переинициализируем viewModel, чтобы сработал init
-        viewModel = ShowUserReviewsViewModel(loadUserReviewsUseCase, savedStateHandle, logger = logger)
+        // Завершаем корутины
+        advanceUntilIdle()
+        job.cancel() // Завершаем коллекцию после завершения теста
 
-        // Проверяем, что был вызван useCase с правильным productId
-        coVerify { loadUserReviewsUseCase.execute(1) }
-    }
+        // Отладка: вывод текущего состояния
+        println("Emitted state: $emittedState")
 
-}
+        // Then: проверяем, что состояние изменилось на Failure с исключением
+        assertEquals(ApiState.Failure(exception), emittedState)
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class MainDispatcherRule(
-    private val dispatcher: TestDispatcher = StandardTestDispatcher()
-) : TestWatcher() {
-    override fun starting(description: Description) {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    override fun finished(description: Description) {
-        Dispatchers.resetMain() // Возвращаем основной диспетчер
+        verify { mockLoadUserReviewsUseCase.execute(123) } // Проверяем вызов useCase
     }
 }

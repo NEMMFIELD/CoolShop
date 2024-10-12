@@ -9,15 +9,24 @@ import com.example.database.models.CoolShopDBO
 import com.example.state.ApiState
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -29,80 +38,126 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CoolShopDetailsViewModelTest {
+
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    val instantExecutorRule = InstantTaskExecutorRule()
 
-    @MockK
-    private lateinit var coolShopDetailsUseCase: CoolShopDetailsUseCase
+    private val testDispatcher = StandardTestDispatcher()
 
-    @MockK
-    private lateinit var addingToCartUseCase: AddingToCartUseCase
+    @RelaxedMockK
+    private lateinit var mockCoolShopDetailsUseCase: CoolShopDetailsUseCase
 
-    private lateinit var savedStateHandle: SavedStateHandle
+    @RelaxedMockK
+    private lateinit var mockAddingToCartUseCase: AddingToCartUseCase
+
+    @RelaxedMockK
+    private lateinit var mockSavedStateHandle: SavedStateHandle
+
     private lateinit var viewModel: CoolShopDetailsViewModel
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @Before
-    fun setUp() {
-        MockKAnnotations.init(this, relaxed = true)
+    fun setup() {
+        MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        savedStateHandle = SavedStateHandle(mapOf(CoolShopDetailsViewModel.ID to "123"))
-        viewModel = CoolShopDetailsViewModel(coolShopDetailsUseCase, addingToCartUseCase, savedStateHandle)
+
+        // Настраиваем возвращаемое значение для ID
+        every { mockSavedStateHandle.get<String>(CoolShopDetailsViewModel.ID) } returns "123"
+
+        // Создаем экземпляр ViewModel
+        viewModel = CoolShopDetailsViewModel(mockCoolShopDetailsUseCase, mockAddingToCartUseCase, mockSavedStateHandle)
     }
 
     @After
     fun tearDown() {
-        Dispatchers.resetMain()
+        Dispatchers.resetMain() // Сбрасываем основной диспетчер
+        clearAllMocks() // Очищаем моки
     }
 
     @Test
-    fun `loadSelectedProduct should emit success when product is loaded`() = runTest {
-        // Given
-        val coolShopModel = CoolShopModel(
-            id = 123, title = "Product", imgPath = "", price = 100.0, rate = 4.5,
-            isLiked = false, description = "Test product", category = "Category"
-        )
-        coEvery { coolShopDetailsUseCase.execute("123") } returns flowOf(coolShopModel)
+    fun `loadSelectedProduct() should emit Success state when useCase returns product`() = runTest {
+        // Given: создаем мок CoolShopModel
+        val product = mockk<CoolShopModel> {
+            every { id } returns 123
+            every { title } returns "Test Product"
+            every { price } returns 99.99
+            every { description } returns "This is a test product"
+        }
 
-        // When
+        // Мокаем выполнение useCase для возврата потока с объектом CoolShopModel
+        every { mockCoolShopDetailsUseCase.execute("123") } returns flowOf(product)
+
+        // Когда: вызываем метод loadSelectedProduct
         viewModel.loadSelectedProduct("123")
 
-        // Then
-        coVerify { coolShopDetailsUseCase.execute("123") }
-        assertTrue(viewModel.postStateFlow.value is ApiState.Success)
-        assertEquals((viewModel.postStateFlow.value as ApiState.Success).data, coolShopModel)
+        // Используем collect для асинхронного получения состояния
+        var emittedState: ApiState<CoolShopModel>? = null
+        val job = launch {
+            viewModel.postStateFlow.collect { state ->
+                emittedState = state // Сохраняем текущее состояние
+            }
+        }
+
+        // Завершаем корутины
+        advanceUntilIdle()
+        job.cancel() // Завершаем коллекцию после завершения теста
+
+        // Отладка: вывод текущего состояния
+        println("Emitted state: $emittedState")
+
+        // Then: проверяем, что состояние изменилось на Success с продуктом
+        assertEquals(ApiState.Success(product), emittedState)
+
+        verify { mockCoolShopDetailsUseCase.execute("123") } // Проверяем вызов useCase
     }
 
     @Test
-    fun `loadSelectedProduct should emit failure when exception is thrown`() = runTest {
-        // Given
-        val exception = Exception("Error loading product")
-        coEvery { coolShopDetailsUseCase.execute("123") } throws exception
+    fun `loadSelectedProduct() should emit Failure state when useCase throws exception`() = runTest {
+        // Given: создаем исключение
+        val exception = Exception("Failed to load product")
 
-        // When
+        // Мокаем выполнение useCase для возврата потока, который выбрасывает исключение
+        every { mockCoolShopDetailsUseCase.execute("123") } returns flow {
+            throw exception
+        }
+
+        // Когда: вызываем метод loadSelectedProduct
         viewModel.loadSelectedProduct("123")
 
-        // Then
-        coVerify { coolShopDetailsUseCase.execute("123") }
-        assertTrue(viewModel.postStateFlow.value is ApiState.Failure)
-        assertEquals((viewModel.postStateFlow.value as ApiState.Failure).message, exception)
+        // Используем collect для асинхронного получения состояния
+        var emittedState: ApiState<CoolShopModel>? = null
+        val job = launch {
+            viewModel.postStateFlow.collect { state ->
+                emittedState = state // Сохраняем текущее состояние
+            }
+        }
+
+        // Завершаем корутины
+        advanceUntilIdle()
+        job.cancel() // Завершаем коллекцию после завершения теста
+
+        // Отладка: вывод текущего состояния
+        println("Emitted state: $emittedState")
+
+        // Then: проверяем, что состояние изменилось на Failure с исключением
+        assertEquals(ApiState.Failure(exception), emittedState)
+
+        verify { mockCoolShopDetailsUseCase.execute("123") } // Проверяем вызов useCase
     }
 
     @Test
-    fun `addToCardProduct should call addingToCartUseCase`() = runTest {
-        // Given
-        val coolShopDBO = CoolShopDBO(
-            id = 1, title = "Product", imgPath = "", price = 100.0, rate = 4.5,
-            isLiked = false, description = "Test product", category = "Category"
-        )
-        coEvery { addingToCartUseCase.execute(coolShopDBO) } just Runs
+    fun `addToCardProduct() should call addingToCartUseCase`() = runTest {
+        // Given: создаем мок CoolShopDBO
+        val productDBO = mockk<CoolShopDBO>(relaxed = true)
 
-        // When
-        viewModel.addToCardProduct(coolShopDBO)
+        // When: вызываем метод addToCardProduct
+        viewModel.addToCardProduct(productDBO)
 
-        // Then
-        coVerify { addingToCartUseCase.execute(coolShopDBO) }
+        // Завершаем корутины
+        advanceUntilIdle() // Это помогает дождаться завершения всех активных корутин
+
+        // Then: проверяем, что добавление в корзину произошло
+        coVerify { mockAddingToCartUseCase.execute(productDBO) }
     }
 }

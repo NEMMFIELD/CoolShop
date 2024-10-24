@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.coolshop.cart.data.CartAdapter
-import com.example.coolshop.cart.data.ClickListener
+import com.example.coolshop.cart.R
+import com.example.coolshop.cart.data.CartMapper
 import com.example.coolshop.cart.databinding.FragmentCartBinding
 import com.example.data.CoolShopModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CartFragment : Fragment(), ClickListener {
@@ -21,6 +25,7 @@ class CartFragment : Fragment(), ClickListener {
     private val viewModel: CartViewModel by viewModels()
     private var cartAdapter: CartAdapter? = null
     private var recyclerView: RecyclerView? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,13 +38,24 @@ class CartFragment : Fragment(), ClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecycler()
-        viewModel.cartedProducts.observe(viewLifecycleOwner) {
-            cartAdapter?.submitList(it.map { com.example.utils.Mapper.mapModelDBOToModel(it) })
-        }
-        viewModel.totalPrice.observe(viewLifecycleOwner) {
-            binding?.totalPrice?.text = it.toString().plus("$")
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.productsInCart.collect { productsListInDatabase ->
+                    cartAdapter?.submitList(productsListInDatabase.map { productsInDatabase ->
+                        CartMapper.mapModelDBOToModel(productsInDatabase)
+                    })
+                }
+            }
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.totalPrice.collect { totalSum ->
+                    binding?.totalPrice?.text =
+                        totalSum.toString().plus(context?.getString(R.string.dollar))
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -59,6 +75,6 @@ class CartFragment : Fragment(), ClickListener {
 
 
     override fun clickItem(item: CoolShopModel) {
-        viewModel.removeItem(com.example.utils.Mapper.mapModelToDBO(item))
+        viewModel.removeItem(CartMapper.mapModelToDBO(item))
     }
 }

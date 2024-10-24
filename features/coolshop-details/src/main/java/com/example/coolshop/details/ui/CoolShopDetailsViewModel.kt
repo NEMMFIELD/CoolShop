@@ -7,8 +7,9 @@ import com.example.coolshop.details.domain.AddingToCartUseCase
 import com.example.coolshop.details.domain.CoolShopDetailsUseCase
 import com.example.data.CoolShopModel
 import com.example.database.models.CoolShopDBO
-import com.example.state.ApiState
+import com.example.state.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,31 +24,35 @@ import javax.inject.Inject
 class CoolShopDetailsViewModel @Inject internal constructor(
     private val useCase: CoolShopDetailsUseCase,
     private val addingToCartUseCase: AddingToCartUseCase,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _postStateFlow: MutableStateFlow<ApiState<CoolShopModel>> =
-        MutableStateFlow(ApiState.Empty)
-    val postStateFlow: StateFlow<ApiState<CoolShopModel>> = _postStateFlow
-        .onStart { loadSelectedProduct(id.toString()) }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            ApiState.Empty
-        )
-    val id = savedStateHandle.get<String>(ID)
 
     companion object {
         const val ID = "id"
     }
 
+    val id = savedStateHandle.get<String>(ID)
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        _postProduct.value = State.Failure(exception)
+    }
+
+    private val _postProduct: MutableStateFlow<State<CoolShopModel>> =
+        MutableStateFlow(State.Empty)
+
+    val postProduct: StateFlow<State<CoolShopModel>> = _postProduct
+        .onStart { loadSelectedProduct(id.toString()) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            State.Empty
+        )
+
     fun loadSelectedProduct(id: String) {
-        viewModelScope.launch {
-            try {
-                useCase.execute(id).collect { product ->
-                    _postStateFlow.value = ApiState.Success(product)
-                }
-            } catch (e: Exception) {
-                _postStateFlow.value = ApiState.Failure(e)
+
+        viewModelScope.launch(exceptionHandler) {
+            useCase.execute(id).collect { product ->
+                _postProduct.value = State.Success(product)
             }
         }
     }

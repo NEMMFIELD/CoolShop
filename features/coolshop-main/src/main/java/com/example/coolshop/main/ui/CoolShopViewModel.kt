@@ -7,9 +7,10 @@ import com.example.coolshop.main.domain.CoolShopFavouritesProductsUseCase
 import com.example.coolshop.main.domain.CoolShopProductsUseCase
 import com.example.coolshop.main.domain.LoadFavouritesProductsUseCase
 import com.example.data.CoolShopModel
-import com.example.state.ApiState
+import com.example.state.State
 import com.example.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,41 +29,39 @@ internal class CoolShopViewModel @Inject internal constructor(
     private val categoryUseCase: CoolShopCategoryUseCase,
     private val logger: Logger
 ) : ViewModel() {
-    private val _postStateFlow: MutableStateFlow<ApiState<List<CoolShopModel>>> =
-        MutableStateFlow(ApiState.Empty)
-    val postStateFlow: StateFlow<ApiState<List<CoolShopModel>>> = _postStateFlow
-            .onStart { loadProducts() }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5000L),
-                ApiState.Empty
-            )
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        _postProducts.value = State.Failure(throwable)
+        logger.e("CoolShopViewModel", "Error loading products", throwable)
+    }
+
+    private val _postProducts: MutableStateFlow<State<List<CoolShopModel>>> =
+        MutableStateFlow(State.Empty)
+
+    val postProducts: StateFlow<State<List<CoolShopModel>>> = _postProducts
+        .onStart { loadProducts() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            State.Empty
+        )
 
 
     internal fun loadProducts() {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineExceptionHandler) {
             withContext(Dispatchers.IO) {
-                try {
-                    useCase.execute().collect { products ->
-                        _postStateFlow.value = com.example.state.ApiState.Success(products)
-                    }
-                } catch (e: Exception) {
-                    logger.e("CoolShopViewModel", "Error loading products", e)
-                    _postStateFlow.value = com.example.state.ApiState.Failure(e)
+                useCase.execute().collect { products ->
+                    _postProducts.value = State.Success(products)
                 }
             }
         }
     }
 
     internal fun loadCategoryProducts(category: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineExceptionHandler) {
             withContext(Dispatchers.IO) {
-                try {
-                    categoryUseCase.execute(category).collect { products ->
-                        _postStateFlow.value = com.example.state.ApiState.Success(products)
-                    }
-                } catch (e: Exception) {
-                    _postStateFlow.value = com.example.state.ApiState.Failure(e)
+                categoryUseCase.execute(category).collect { products ->
+                    _postProducts.value = State.Success(products)
                 }
             }
         }

@@ -46,23 +46,36 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(project(":core:utils"))
-    testImplementation(libs.junit)
-    testImplementation(project(":core:State"))
+    //hilt
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
+
+    //datastore
     implementation(libs.datastore.preferences)
+
+    //navigation
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.navigation.features)
+
+    //leak canary
     debugImplementation(libs.leak.canary)
+
+    //splash screen
     implementation(libs.splash.screen)
+
+    //projects implementation
+    implementation(project(":core:utils"))
     implementation(project(":core:coolshop-api"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":features:coolshop-main"))
     implementation(project(":features:coolshop-details"))
     implementation(project(":features:coolshop-cart"))
     implementation(project(":features:coolshop-user"))
     implementation(project(":features:coolshop-reviews"))
     implementation(project(":core:database"))
+
+    //tests implementation
+    testImplementation(libs.junit)
+    testImplementation(project(":core:State"))
 }

@@ -23,7 +23,7 @@ rootProject.name = "Cool Shop"
 include(":app")
 include(":core:coolshop-api")
 include(":features:coolshop-main")
-include(":core:data")
+include(":core:models")
 include(":features:coolshop-details")
 include(":Mapper")
 include(":core:State")

@@ -6,4 +6,8 @@
     <string name="show_reviews">Show reviews</string>
     <string name="price">Price</string>
     <string name="rating">Rating</string>
+    <string name = "dollar">$</string>
+    <string name = "prefixPrice">Price:</string>
+    <string name = "prefixRate">Rate:</string>
+    <string name = "nav_deep_link_to_reviews_fragment">android-app://com.example.coolshop.reviews.ui/showingReviewsFragment/%1$d </string>
 </resources>

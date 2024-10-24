@@ -1,5 +1,6 @@
 package com.example.coolshop.cart.domain
 
+import com.example.coolshop.cart.data.CartRepository
 import com.example.database.models.CoolShopDBO
 import io.mockk.every
 import io.mockk.mockk
@@ -33,7 +34,7 @@ class ProductObserveUseCaseTest {
         every { repository.flowCart } returns flowOf(expectedProducts)
 
         // When: получаем поток с продуктами из use case
-        val resultFlow = productObserveUseCase.observedProduct
+        val resultFlow = productObserveUseCase.observedProductsInCart
 
         // Then: collect используем внутри runTest и проверяем результат
         resultFlow.collect { productList ->

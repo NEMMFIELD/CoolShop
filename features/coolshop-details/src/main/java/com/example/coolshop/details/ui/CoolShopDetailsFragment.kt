@@ -2,6 +2,7 @@ package com.example.coolshop.details.ui
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,14 +18,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.fragment.findNavController
 import coil.load
+import com.example.coolshop.details.R
+import com.example.coolshop.details.data.CoolShopDetailsMapper
 import com.example.coolshop.details.databinding.FragmentCoolShopDetailsBinding
 import com.example.coolshop.reviews.ui.AddingUserReviewFragment
 import com.example.database.models.CoolShopDBO
-import com.example.state.ApiState
+import com.example.state.State
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val TOKEN = "token"
+const val PRODUCT_ID = "productId"
 @AndroidEntryPoint
 class CoolShopDetailsFragment : Fragment() {
     private var _binding: FragmentCoolShopDetailsBinding? = null
@@ -46,29 +51,37 @@ class CoolShopDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val currentUser = sharedPreferences.getString("token", null)
+        val currentUser = sharedPreferences.getString(TOKEN, null)
         binding?.dialogShow?.isEnabled = !currentUser.isNullOrEmpty()
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.postStateFlow.collect { state ->
+                viewModel.postProduct.collect { state ->
                     when (state) {
-                        is ApiState.Success -> {
+                        is State.Success -> {
                             with(binding) {
                                 this?.detailsTitle?.text = state.data.title
                                 this?.detailsProductImage?.load(state.data.imgPath)
                                 this?.detailsDescription?.text = state.data.description
                                 this?.productCategory?.text = state.data.category
                                 this?.detailsPrice?.text =
-                                    "Price: ".plus(state.data.price.toString()).plus("$")
-                                this?.detailsRate?.text = "Rate: ".plus(state.data.rate.toString())
+                                    requireContext().getString(R.string.prefixPrice)
+                                        .plus(state.data.price.toString()).plus(
+                                            requireContext().getString(
+                                                R.string.dollar
+                                            )
+                                        )
+
+                                this?.detailsRate?.text =
+                                    requireContext().getString(R.string.prefixRate)
+                                        .plus(state.data.rate.toString())
                             }
-                            binding?.btnAddCart?.setOnClickListener {
-                                addToCart(com.example.utils.Mapper.mapModelToDBO(state.data))
+                            binding?.buttonAddToCart?.setOnClickListener {
+                                addToCart(CoolShopDetailsMapper.mapModelToDBO(state.data))
                             }
                         }
 
-                        is ApiState.Failure -> {
+                        is State.Failure -> {
                             Log.d("TagError", "Error ${state.message}")
                         }
 
@@ -77,7 +90,7 @@ class CoolShopDetailsFragment : Fragment() {
                 }
             }
         }
-        binding?.btnBack?.setOnClickListener {
+        binding?.buttonBack?.setOnClickListener {
             backToMainScreen()
         }
 
@@ -85,7 +98,7 @@ class CoolShopDetailsFragment : Fragment() {
             createDialogFragment()
         }
 
-        binding?.btnShowReviews?.setOnClickListener {
+        binding?.buttonShowReviews?.setOnClickListener {
             navigateToReviews()
         }
     }
@@ -97,15 +110,23 @@ class CoolShopDetailsFragment : Fragment() {
 
     private fun createDialogFragment() {
         val showPopUp = AddingUserReviewFragment()
-        bundle.putString("productId", viewModel.id)
+        bundle.putString(PRODUCT_ID, viewModel.id)
         showPopUp.arguments = bundle
         showPopUp.show((activity as AppCompatActivity).supportFragmentManager, "showPopUp")
     }
 
     private fun navigateToReviews() {
-        val request = NavDeepLinkRequest.Builder
-            .fromUri("android-app://com.example.coolshop.reviews.ui/showingReviewsFragment/${viewModel.id}".toUri())
+        val uri = Uri.Builder()
+            .scheme("android-app")
+            .authority("com.example.coolshop.reviews.ui")
+            .appendPath("showingReviewsFragment")
+            .appendPath(viewModel.id.toString())  // Используйте id из ViewModel
             .build()
+
+        val request = NavDeepLinkRequest.Builder
+            .fromUri(uri)
+            .build()
+
         findNavController().navigate(request)
     }
 

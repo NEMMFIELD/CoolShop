@@ -6,16 +6,12 @@ import com.example.coolshop.details.domain.AddingToCartUseCase
 import com.example.coolshop.details.domain.CoolShopDetailsUseCase
 import com.example.data.CoolShopModel
 import com.example.database.models.CoolShopDBO
-import com.example.state.ApiState
+import com.example.state.State
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -23,9 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -35,7 +29,6 @@ import org.junit.Before
 import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -92,9 +85,9 @@ class CoolShopDetailsViewModelTest {
         viewModel.loadSelectedProduct("123")
 
         // Используем collect для асинхронного получения состояния
-        var emittedState: ApiState<CoolShopModel>? = null
+        var emittedState: State<CoolShopModel>? = null
         val job = launch {
-            viewModel.postStateFlow.collect { state ->
+            viewModel.postProduct.collect { state ->
                 emittedState = state // Сохраняем текущее состояние
             }
         }
@@ -107,7 +100,7 @@ class CoolShopDetailsViewModelTest {
         println("Emitted state: $emittedState")
 
         // Then: проверяем, что состояние изменилось на Success с продуктом
-        assertEquals(ApiState.Success(product), emittedState)
+        assertEquals(State.Success(product), emittedState)
 
         verify { mockCoolShopDetailsUseCase.execute("123") } // Проверяем вызов useCase
     }
@@ -126,9 +119,9 @@ class CoolShopDetailsViewModelTest {
         viewModel.loadSelectedProduct("123")
 
         // Используем collect для асинхронного получения состояния
-        var emittedState: ApiState<CoolShopModel>? = null
+        var emittedState: State<CoolShopModel>? = null
         val job = launch {
-            viewModel.postStateFlow.collect { state ->
+            viewModel.postProduct.collect { state ->
                 emittedState = state // Сохраняем текущее состояние
             }
         }
@@ -141,7 +134,7 @@ class CoolShopDetailsViewModelTest {
         println("Emitted state: $emittedState")
 
         // Then: проверяем, что состояние изменилось на Failure с исключением
-        assertEquals(ApiState.Failure(exception), emittedState)
+        assertEquals(State.Failure(exception), emittedState)
 
         verify { mockCoolShopDetailsUseCase.execute("123") } // Проверяем вызов useCase
     }

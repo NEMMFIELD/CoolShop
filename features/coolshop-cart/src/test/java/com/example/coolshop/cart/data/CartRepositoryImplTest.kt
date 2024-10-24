@@ -77,8 +77,8 @@ class CartRepositoryImplTest{
         )
 
         coEvery { dao.getAll() } returns dbProducts
-        mockkObject(com.example.utils.Mapper)
-        every { com.example.utils.Mapper.mapModelDBOToModel(any()) } returns expectedModel.first()
+        mockkObject(CartMapper)
+        every { CartMapper.mapModelDBOToModel(any()) } returns expectedModel.first()
 
         // When: загружаем продукты из базы данных
         val result = repository.loadProductsFromDatabase()

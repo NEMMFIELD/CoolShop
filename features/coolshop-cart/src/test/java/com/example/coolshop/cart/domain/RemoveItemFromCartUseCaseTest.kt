@@ -1,10 +1,10 @@
 package com.example.coolshop.cart.domain
 
+import com.example.coolshop.cart.data.CartRepository
 import com.example.database.models.CoolShopDBO
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import kotlin.test.Test

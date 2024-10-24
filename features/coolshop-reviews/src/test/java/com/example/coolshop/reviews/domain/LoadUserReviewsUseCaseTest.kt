@@ -1,6 +1,7 @@
 package com.example.coolshop.reviews.domain
 
 import android.util.Log
+import com.example.coolshop.reviews.data.UserReviewsRepository
 import com.example.database.models.UserReviewDBO
 import com.example.utils.Logger
 import io.mockk.Runs
@@ -11,11 +12,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -34,7 +31,7 @@ class LoadUserReviewsUseCaseTest {
         repository = mockk()
         logger = mockk<Logger>()
         every { logger.e(any(), any(), any()) } just Runs
-        useCase = LoadUserReviewsUseCase(repository,logger)
+        useCase = LoadUserReviewsUseCase(repository)
 
         // Мокаем статический метод Log.d
         mockkStatic(Log::class)

@@ -44,10 +44,34 @@ android {
 }
 
 dependencies {
-
+    //core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    api(libs.fragment)
+
+    //recyclerView
+    implementation(libs.recyclerview)
+
+    //coil
+    implementation(libs.coil)
+
+    //dagger
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+
+    //cardView
+    implementation(libs.cardview)
+
+    //navigation
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.features)
+    implementation(libs.navigation.ui)
+
+    //splashActivity
+    implementation(libs.splash.screen)
+
+    //tests implementation
     testImplementation(libs.junit)
     testImplementation(libs.mockito)
     testImplementation(libs.jupiter)
@@ -55,18 +79,10 @@ dependencies {
     testImplementation(libs.mockk.android)
     testImplementation(libs.coroutines.test)
     testImplementation (libs.androidx.core.testing)
-    api(libs.fragment)
-    implementation(libs.recyclerview)
-    implementation(libs.coil)
-    implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
-    implementation(libs.cardview)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.features)
-    implementation(libs.navigation.ui)
-    implementation(libs.splash.screen)
+
+    //implementation projects
     implementation(project(":core:coolshop-api"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":core:database"))
     implementation(project(":core:State"))
     implementation(project(":features:coolshop-details"))

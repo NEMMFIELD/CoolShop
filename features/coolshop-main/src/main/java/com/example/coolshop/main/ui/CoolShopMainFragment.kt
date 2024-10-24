@@ -18,10 +18,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coolshop.main.R
-import com.example.coolshop.main.data.models.ClickListener
-import com.example.coolshop.main.data.models.CoolShopAdapter
-import com.example.coolshop.main.data.models.ItemOffsetDecoration
-import com.example.coolshop.main.data.models.SetFavourites
 import com.example.coolshop.main.databinding.FragmentCoolShopMainBinding
 import com.example.data.CoolShopModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,7 +35,6 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         _binding = FragmentCoolShopMainBinding.inflate(inflater, container, false)
         val view = binding?.root
         return view
@@ -50,8 +45,10 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
         //Смена списка в зависимости от выбранной категории
         val categories = resources.getStringArray(R.array.categories_array)
         val arrayAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, categories)
+
         binding?.autoCompleteTextView?.setAdapter(arrayAdapter)
-        binding?.autoCompleteTextView?.setOnItemClickListener { parent, view, position, id ->
+
+        binding?.autoCompleteTextView?.setOnItemClickListener { parent, _, position, _ ->
             if (parent.adapter.getItem(position) == "all") viewModel.loadProducts()
             else viewModel.loadCategoryProducts(parent?.adapter?.getItem(position).toString())
         }
@@ -63,16 +60,17 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
         setupRecycler()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.postStateFlow.collect { state ->
+
+                viewModel.postProducts.collect { state ->
                     when (state) {
-                        is com.example.state.ApiState.Success -> {
+                        is com.example.state.State.Success -> {
                             state.data.forEach { product ->
                                 viewModel.loadFavourites(product)
                             }
                             coolShopAdapter?.submitList(state.data)
                         }
 
-                        is com.example.state.ApiState.Failure -> {
+                        is com.example.state.State.Failure -> {
                             Log.d("TagError", "On Create ${state.message}")
                         }
 
@@ -91,13 +89,16 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
     }
 
     private fun setupRecycler() {
+
         val spanCount = if (activity?.resources?.configuration?.orientation !=
             Configuration.ORIENTATION_PORTRAIT
         ) 4 else 2
-        recyclerView = binding!!.recyclerView
+
+        recyclerView = binding!!.recyclerViewProducts
         recyclerView?.layoutManager = GridLayoutManager(requireContext(), spanCount)
         coolShopAdapter = CoolShopAdapter(emptyList(), this, this)
         recyclerView?.adapter = coolShopAdapter
+
         val itemDecoration = ItemOffsetDecoration(10)
         recyclerView?.addItemDecoration(itemDecoration)
     }
@@ -110,7 +111,7 @@ class CoolShopMainFragment : Fragment(), SetFavourites, ClickListener {
 
     override fun clickItem(item: CoolShopModel) {
         val request = NavDeepLinkRequest.Builder
-            .fromUri("android-app://com.example.coolshop.details.ui/coolShopDetailsFragment/${item.id}".toUri())
+            .fromUri(requireContext().getString(R.string.nav_deep_link,item.id).toUri())
             .build()
         findNavController().navigate(request)
     }

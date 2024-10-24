@@ -40,10 +40,24 @@ android {
 }
 
 dependencies {
-
+    //core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    //recyclerView
+    implementation(libs.recyclerview)
+
+    //navigation
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.features)
+    implementation(libs.navigation.ui)
+
+    //hilt
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+    
+    //tests implementation
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.mockk.android)
@@ -51,14 +65,10 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.robolectric)
     testImplementation (libs.androidx.core.testing)
-    implementation(libs.recyclerview)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.features)
-    implementation(libs.navigation.ui)
-    implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+
+    //implementation projects
     implementation(project(":core:database"))
     implementation(project(":core:utils"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":core:State"))
 }

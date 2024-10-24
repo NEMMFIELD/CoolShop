@@ -1,20 +1,15 @@
 package com.example.coolshop.main.ui
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.coolshop.main.domain.CoolShopCategoryUseCase
 import com.example.coolshop.main.domain.CoolShopFavouritesProductsUseCase
 import com.example.coolshop.main.domain.CoolShopProductsUseCase
 import com.example.coolshop.main.domain.LoadFavouritesProductsUseCase
 import com.example.data.CoolShopModel
-import com.example.state.ApiState
+import com.example.state.State
 import com.example.utils.Logger
-import io.mockk.MockKAnnotations
 import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
@@ -23,15 +18,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 
@@ -75,11 +69,11 @@ class CoolShopViewModelTest {
         every { mockUseCase.execute() } returns flowOf(products)
 
         // Когда
-        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+        val states = mutableListOf<State<List<CoolShopModel>>>()
 
         // Собираем данные из поста
         val job = launch {
-            viewModel.postStateFlow.collect {
+            viewModel.postProducts.collect {
                 states.add(it) // Добавляем каждое изменение состояния
             }
         }
@@ -91,7 +85,7 @@ class CoolShopViewModelTest {
         advanceUntilIdle()
 
         // Проверяем, что состояние изменилось с Empty на Success
-        assertEquals(listOf(ApiState.Empty, ApiState.Success(products)), states)
+        assertEquals(listOf(State.Empty, State.Success(products)), states)
 
         job.cancel() // Останавливаем сбор данных
 
@@ -109,11 +103,11 @@ class CoolShopViewModelTest {
         every { mockUseCase.execute() } throws exception
 
         // Когда
-        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+        val states = mutableListOf<State<List<CoolShopModel>>>()
 
         // Собираем изменения в postStateFlow
         val job = launch {
-            viewModel.postStateFlow.collect { state ->
+            viewModel.postProducts.collect { state ->
                 states.add(state) // Добавляем каждое изменение состояния в список
             }
         }
@@ -124,14 +118,25 @@ class CoolShopViewModelTest {
         // Ожидаем завершения всех корутин
         advanceUntilIdle()
 
-        // Тогда: проверяем, что после Empty должно произойти изменение на Failure
-        assertEquals(listOf(ApiState.Empty, ApiState.Failure(exception)), states)
+        // Проверяем, что состояний два: Empty и Failure
+        assertEquals(2, states.size)
+        assertTrue(states[1] is State.Failure) // Проверяем, что второе состояние — это Failure
+
+        // Сравниваем сообщение исключения
+        val actualException = (states[1] as State.Failure).message
+        assertEquals("Failed to load products", actualException.message) // Проверяем сообщение
 
         // Останавливаем сбор данных
         job.cancel()
 
-        // Проверяем, что logger был вызван для обработки ошибки
-        verify { mockLogger.e("CoolShopViewModel", "Error loading products", exception) }
+        // Проверяем, что logger был вызван для обработки ошибки с использованием кастомного матчера
+        verify {
+            mockLogger.e(
+                eq("CoolShopViewModel"),
+                eq("Error loading products"),
+                match { it is Exception && it.message == "Failed to load products" }
+            )
+        }
     }
 
     @Test
@@ -140,9 +145,9 @@ class CoolShopViewModelTest {
         val category = "Electronics"
         val products = listOf(mockk<CoolShopModel>())
         every { mockCategoryUseCase.execute(category) } returns flowOf(products)
-        val states = mutableListOf<ApiState<List<CoolShopModel>>>()
+        val states = mutableListOf<State<List<CoolShopModel>>>()
         val job = launch {
-            viewModel.postStateFlow.collect { state ->
+            viewModel.postProducts.collect { state ->
                 states.add(state)
             }
         }
@@ -153,7 +158,7 @@ class CoolShopViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertEquals(ApiState.Success(products), viewModel.postStateFlow.value)
+        assertEquals(State.Success(products), viewModel.postProducts.value)
         job.cancel()
         verify { mockCategoryUseCase.execute(category) }
         confirmVerified(mockCategoryUseCase)

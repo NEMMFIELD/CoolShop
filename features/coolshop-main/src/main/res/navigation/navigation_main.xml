@@ -11,6 +11,7 @@
         android:label="CoolShopMainFragment"
         tools:layout="@layout/fragment_cool_shop_main" >
     </fragment>
+
     <fragment
         android:id="@+id/coolShopDetailsFragment"
         android:name="com.example.coolshop.details.ui.CoolShopDetailsFragment"
@@ -22,6 +23,7 @@
         <deepLink
             app:uri="android-app://com.example.coolshop.details.ui/coolShopDetailsFragment/{id}"/>
       </fragment>
+    
 <include app:graph="@navigation/navigation_details"/>
     <include app:graph="@navigation/navigation_reviews"/>
 </navigation>

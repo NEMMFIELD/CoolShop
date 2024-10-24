@@ -35,13 +35,29 @@ android {
     }
     buildFeatures {
         viewBinding = true
+
     }
 }
 
 dependencies {
+    //core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    //hilt
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+
+    //coil
+    implementation(libs.coil)
+
+    //navigation
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.features)
+    implementation(libs.navigation.ui)
+
+    //implementation tests
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.mockk.android)
@@ -49,14 +65,10 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.robolectric)
     testImplementation (libs.androidx.core.testing)
-    implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
-    implementation(libs.coil)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.features)
-    implementation(libs.navigation.ui)
+
+    //implementation projects
     implementation(project(":core:coolshop-api"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":core:State"))
     implementation(project(":core:database"))
     implementation(project(":core:utils"))

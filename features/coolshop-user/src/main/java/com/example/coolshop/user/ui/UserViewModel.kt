@@ -1,8 +1,5 @@
 package com.example.coolshop.user.ui
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coolshop.api.models.LoginRequest
@@ -10,7 +7,10 @@ import com.example.coolshop.user.domain.LoginUseCase
 import com.example.coolshop.user.domain.SaveTokenUseCase
 import com.example.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,30 +19,28 @@ import javax.inject.Inject
 class UserViewModel @Inject internal constructor(
     private val useCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
-    private val logger:Logger
+    private val logger: Logger
 ) : ViewModel() {
-    private val _token = MutableLiveData<String>()
-    val token: LiveData<String> get() = _token
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        logger.d("Error", "Coroutine exception: $exception")
+    }
+
+    private val _token = MutableStateFlow<String?>(null)
+    val token: StateFlow<String?> get() = _token
+
     var account = LoginRequest("", "")
+
     fun login(loginRequest: LoginRequest) {
-        viewModelScope.launch {
-            try {
-                _token.value = useCase.execute(loginRequest = loginRequest).token
-            } catch (e: Exception) {
-                logger.d("Error", "Error from login:${e}")
-            }
+        viewModelScope.launch(exceptionHandler) {
+            _token.value = useCase.execute(loginRequest = loginRequest).token
         }
     }
 
     fun saveToken(token: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             withContext(Dispatchers.IO) {
-                try {
-                    saveTokenUseCase.execute(token)
-                }
-               catch (e: Exception) {
-                   logger.d("Error", "Error from save token:${e}")
-               }
+                saveTokenUseCase.execute(token)
             }
         }
     }

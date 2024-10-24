@@ -59,7 +59,7 @@
         app:layout_constraintTop_toBottomOf="@+id/imageProduct" />
 
        <ImageView
-           android:id="@+id/favourite"
+           android:id="@+id/favourite_product"
            android:layout_width="@dimen/favourite_icon_width"
            android:layout_height="@dimen/favourite_icon_height"
            android:src="@drawable/heart"

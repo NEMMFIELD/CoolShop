@@ -2,12 +2,12 @@ package com.example.coolshop.reviews.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
+import com.example.coolshop.reviews.data.CoolShopReviewsMapper
 import com.example.coolshop.reviews.domain.LoadUserReviewsUseCase
 import com.example.data.UserReviewModel
 import com.example.database.models.UserReviewDBO
-import com.example.state.ApiState
+import com.example.state.State
 import com.example.utils.Logger
-import com.example.utils.Mapper
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -33,7 +33,6 @@ import kotlin.test.assertEquals
 class ShowUserReviewsViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
-
     private val testDispatcher = StandardTestDispatcher()
 
     @RelaxedMockK
@@ -44,7 +43,6 @@ class ShowUserReviewsViewModelTest {
 
     @RelaxedMockK
     private lateinit var mockLogger: Logger
-
     private lateinit var viewModel: ShowUserReviewsViewModel
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,12 +51,11 @@ class ShowUserReviewsViewModelTest {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
 
-        // Настраиваем возвращаемое значение для productId
-        every { mockSavedStateHandle.get<String>(ShowUserReviewsViewModel.PRODUCT_ID) } returns "123"
+        //Настраиваем возвращаемое значение для productId
+        every { mockSavedStateHandle.get<String>(PRODUCT_ID) } returns "123"
 
-        // Создаем экземпляр ViewModel
-        viewModel =
-            ShowUserReviewsViewModel(mockLoadUserReviewsUseCase, mockSavedStateHandle, mockLogger)
+        //Создаем экземпляр ViewModel
+        viewModel = ShowUserReviewsViewModel(mockLoadUserReviewsUseCase, mockSavedStateHandle, mockLogger)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -89,7 +86,7 @@ class ShowUserReviewsViewModelTest {
         viewModel.loadReviews(123)
 
         // Используем collect для асинхронного получения состояния
-        var emittedState: ApiState<List<UserReviewModel>>? = null
+        var emittedState: State<List<UserReviewModel>>? = null
         val job = launch {
             viewModel.reviewsStateFlow.collect { state ->
                 emittedState = state // Сохраняем текущее состояние
@@ -104,8 +101,8 @@ class ShowUserReviewsViewModelTest {
         println("Emitted state: $emittedState")
 
         // Then: проверяем, что состояние изменилось на Success с преобразованными отзывами
-        val expectedReviews = reviewsDBO.map { Mapper.mapReviewDBOToReview(it) }
-        assertEquals(ApiState.Success(expectedReviews), emittedState)
+        val expectedReviews = reviewsDBO.map { CoolShopReviewsMapper.mapReviewDBOToReview(it) }
+        assertEquals(State.Success(expectedReviews), emittedState)
 
         verify { mockLoadUserReviewsUseCase.execute(123) } // Проверяем вызов useCase
     }
@@ -123,7 +120,7 @@ class ShowUserReviewsViewModelTest {
         viewModel.loadReviews(123)
 
         // Используем collect для асинхронного получения состояния
-        var emittedState: ApiState<List<UserReviewModel>>? = null
+        var emittedState: State<List<UserReviewModel>>? = null
         val job = launch {
             viewModel.reviewsStateFlow.collect { state ->
                 emittedState = state // Сохраняем текущее состояние
@@ -138,7 +135,7 @@ class ShowUserReviewsViewModelTest {
         println("Emitted state: $emittedState")
 
         // Then: проверяем, что состояние изменилось на Failure с исключением
-        assertEquals(ApiState.Failure(exception), emittedState)
+        assertEquals(State.Failure(exception), emittedState)
 
         verify { mockLoadUserReviewsUseCase.execute(123) } // Проверяем вызов useCase
     }

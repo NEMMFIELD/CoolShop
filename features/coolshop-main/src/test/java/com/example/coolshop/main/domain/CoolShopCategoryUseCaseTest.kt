@@ -1,9 +1,10 @@
 package com.example.coolshop.main.domain
 
 import com.example.coolshop.api.models.Rating
-import com.example.coolshop.api.models.ResponseItem
+import com.example.coolshop.api.models.ProductDTO
+import com.example.coolshop.main.data.CoolShopMapper
+import com.example.coolshop.main.data.CoolShopRepository
 import com.example.data.CoolShopModel
-import com.example.utils.Mapper
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -25,7 +26,7 @@ class CoolShopCategoryUseCaseTest{
     // Тестовые данные
     private val testCategory = "electronics"
     private val responseItemList = listOf(
-        ResponseItem(
+        ProductDTO(
             id = 1,
             title = "Phone",
             image = "img/path",
@@ -34,7 +35,7 @@ class CoolShopCategoryUseCaseTest{
             category = "electronics",
             rating = Rating(rate = 4.5, count = 100)
         ),
-        ResponseItem(
+        ProductDTO(
             id = 2,
             title = "Laptop",
             image = "img/path",
@@ -74,9 +75,9 @@ class CoolShopCategoryUseCaseTest{
         coEvery { repository.loadCategory(testCategory) } returns responseItemList
 
         // Мокаем маппер
-        mockkObject(Mapper)
+        mockkObject(CoolShopMapper)
         responseItemList.forEachIndexed { index, item ->
-            coEvery { Mapper.mapDTOToModel(item) } returns mappedModels[index]
+            coEvery { CoolShopMapper.mapDTOToModel(item) } returns mappedModels[index]
         }
 
         // Выполняем use case

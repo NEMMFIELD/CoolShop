@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+
+    //implementation projects
     implementation(project(":core:coolshop-api"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
 }

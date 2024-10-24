@@ -9,4 +9,7 @@
         <item>women\'s clothing</item>
         <item>all</item>
     </string-array>
+    <string name="rating">Rate:</string>
+    <string name="dollar">$</string>
+    <string name = "nav_deep_link">android-app://com.example.coolshop.details.ui/coolShopDetailsFragment/%1$d </string>
 </resources>

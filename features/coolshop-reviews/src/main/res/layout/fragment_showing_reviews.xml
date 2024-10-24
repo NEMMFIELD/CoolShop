@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageButton
-            android:id="@+id/reviews_btn_back"
+            android:id="@+id/reviews_button_to_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/pngwing"
@@ -46,7 +46,7 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/showed_reviews_recycler"
+        android:id="@+id/showed_reviews_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

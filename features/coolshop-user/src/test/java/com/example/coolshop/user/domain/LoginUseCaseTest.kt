@@ -2,6 +2,7 @@ package com.example.coolshop.user.domain
 
 import com.example.coolshop.api.models.LoginRequest
 import com.example.coolshop.api.models.RegistrationResponse
+import com.example.coolshop.user.data.LoginRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -1,15 +1,12 @@
 package com.example.coolshop.cart.domain
 
+import com.example.coolshop.cart.data.CartRepository
 import com.example.data.CoolShopModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertEquals

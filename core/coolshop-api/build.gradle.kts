@@ -9,9 +9,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 dependencies {
-    implementation(libs.retrofit)
+    //coroutines
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.core)
+
+    //retrofit+moshi+interceptor
+    implementation(libs.retrofit)
     implementation(libs.kotlinx.serialization)
     api(libs.logging.interceptor)
     api(libs.moshi.kotlin)

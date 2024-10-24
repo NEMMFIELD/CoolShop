@@ -38,9 +38,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
+    //implementation projects
     implementation(project(":core:coolshop-api"))
-    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":core:database"))
 }

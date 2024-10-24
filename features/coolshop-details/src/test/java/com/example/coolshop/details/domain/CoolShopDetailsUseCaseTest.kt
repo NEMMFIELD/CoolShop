@@ -1,9 +1,10 @@
 package com.example.coolshop.details.domain
 
 import com.example.coolshop.api.models.Rating
-import com.example.coolshop.api.models.ResponseItem
+import com.example.coolshop.api.models.ProductDTO
+import com.example.coolshop.details.data.CoolShopDetailsMapper
+import com.example.coolshop.details.data.CoolShopDetailsRepository
 import com.example.data.CoolShopModel
-import com.example.utils.Mapper
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -29,7 +30,7 @@ class CoolShopDetailsUseCaseTest {
     fun setUp() {
         // Создаем моки для репозитория и маппера
         repository = mockk()
-        mockkObject(Mapper)
+        mockkObject(CoolShopDetailsMapper)
 
         // Инициализируем useCase с мокнутым репозиторием
         useCase = CoolShopDetailsUseCase(repository)
@@ -44,7 +45,7 @@ class CoolShopDetailsUseCaseTest {
         val id = "1"
 
         // Создаем реальный объект ResponseItem
-        val dto = ResponseItem(
+        val dto = ProductDTO(
             id = 1,
             title = "Product 1",
             image = "/img1.jpg",
@@ -70,7 +71,7 @@ class CoolShopDetailsUseCaseTest {
         coEvery { repository.loadProductDetails(id) } returns dto
 
         // Мокируем вызов маппера, чтобы он преобразовывал DTO в модель
-        coEvery { Mapper.mapDTOToModel(dto) } returns model
+        coEvery { CoolShopDetailsMapper.mapDTOToModel(dto) } returns model
 
         // When
         val result = useCase.execute(id).first()

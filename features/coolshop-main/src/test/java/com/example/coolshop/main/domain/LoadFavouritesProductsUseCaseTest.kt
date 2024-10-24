@@ -1,11 +1,11 @@
 package com.example.coolshop.main.domain
 
+import com.example.coolshop.main.data.CoolShopRepository
 import com.example.data.CoolShopModel
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
 
 class LoadFavouritesProductsUseCaseTest {
     private lateinit var useCase: LoadFavouritesProductsUseCase

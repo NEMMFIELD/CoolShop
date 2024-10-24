@@ -2,13 +2,12 @@ package com.example.coolshop.details.data
 
 import com.example.coolshop.api.CoolShopApi
 import com.example.coolshop.api.models.Rating
-import com.example.coolshop.api.models.ResponseItem
+import com.example.coolshop.api.models.ProductDTO
 import com.example.database.dao.CoolShopDao
 import com.example.database.models.CoolShopDBO
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import kotlin.test.Test
@@ -34,7 +33,7 @@ class CoolShopDetailsRepositoryImplTest {
     fun `loadProductDetails should return ResponseItem when API call is successful`() = runTest {
         // Given
         val id = "1"
-        val expectedResponse = ResponseItem(
+        val expectedResponse = ProductDTO(
             id = 1,
             title = "Product 1",
             image = "/img1.jpg",

@@ -1,117 +1,131 @@
 package com.example.coolshop.cart.ui
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
 import com.example.coolshop.cart.domain.ProductObserveUseCase
 import com.example.coolshop.cart.domain.RemoveItemFromCartUseCase
 import com.example.coolshop.cart.domain.TotalPriceUseCase
 import com.example.database.models.CoolShopDBO
-import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 class CartViewModelTest {
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    // Mock-объекты для зависимостей
+    private val removeItemUseCase: RemoveItemFromCartUseCase = mockk(relaxed = true)
+    private val productObserveUseCase: ProductObserveUseCase = mockk()
+    private val totalPriceUseCase: TotalPriceUseCase = mockk()
 
-    @MockK
-    private lateinit var removeItemFromCartUseCase: RemoveItemFromCartUseCase
-
-    @MockK
-    private lateinit var productObserveUseCase: ProductObserveUseCase
-
-    @MockK
-    private lateinit var totalPriceUseCase: TotalPriceUseCase
-
+    // Тестируемая ViewModel
     private lateinit var viewModel: CartViewModel
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
+    // Подготовка перед каждым тестом
     @Before
-    fun setUp() {
-        MockKAnnotations.init(this, relaxed = true)
-        Dispatchers.setMain(testDispatcher)
+    fun setup() {
+        // Используем TestCoroutineDispatcher и TestCoroutineScope для корутин
+        Dispatchers.setMain(StandardTestDispatcher())
 
-        // Замокируем потоки, возвращаемые useCase
-        every { productObserveUseCase.observedProduct } returns flowOf(listOf(CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category")))
-        every { totalPriceUseCase.observedTotalPrice } returns flowOf(100.0)
+        // Инициализация mock для StateFlow
+        every { productObserveUseCase.observedProductsInCart } returns MutableStateFlow(emptyList())
+        every { totalPriceUseCase.observedTotalPriceInCart } returns MutableStateFlow(null)
 
-        // Создаем ViewModel
-        viewModel = CartViewModel(removeItemFromCartUseCase, productObserveUseCase, totalPriceUseCase)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+        // Инициализация viewModel с mock-объектами
+        viewModel = CartViewModel(removeItemUseCase, productObserveUseCase, totalPriceUseCase)
     }
 
     @Test
-    fun `cartedProducts should observe products from ProductObserveUseCase`() = runTest {
-        // Given
-        val observer = mockk<Observer<List<CoolShopDBO>>>(relaxed = true)
-        viewModel.cartedProducts.observeForever(observer)
+    fun `should observe products in cart`() = runTest {
+        val testProducts = listOf(CoolShopDBO(1, "Product1", "path", 10.0, 5.0, true, "Description", "Category"))
+        val productsFlow = MutableStateFlow(emptyList<CoolShopDBO>()) // Изначально пусто
 
-        // When
-        val slot = slot<List<CoolShopDBO>>()
-        val expectedProducts = listOf(CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category"))
+        // Настройка mock для потока продуктов в корзине
+        every { productObserveUseCase.observedProductsInCart } returns productsFlow
 
-        // Then
-        verify { observer.onChanged(capture(slot)) }
+        // Инициализация ViewModel
+        viewModel = CartViewModel(removeItemUseCase, productObserveUseCase, totalPriceUseCase)
 
-        // Compare objects by fields instead of reference
-        assertEquals(expectedProducts.size, slot.captured.size)
-        assertEquals(expectedProducts[0].id, slot.captured[0].id)
-        assertEquals(expectedProducts[0].title, slot.captured[0].title)
-        assertEquals(expectedProducts[0].price, slot.captured[0].price)
+        // Запуск корутины для сбора данных из StateFlow
+        val collectedProducts = mutableListOf<List<CoolShopDBO>>()
+        val job = launch {
+            viewModel.productsInCart.collect { collectedProducts.add(it) }
+        }
 
-        viewModel.cartedProducts.removeObserver(observer)
+        // Эмитируем тестовые данные в поток
+        productsFlow.value = testProducts
+
+        // Симулируем задержку, чтобы дождаться эмиссии данных
+        advanceTimeBy(1000)
+
+        // Проверяем, что собранные данные совпадают с тестовыми
+        assertEquals(testProducts, collectedProducts.last())
+
+        job.cancel() // Завершаем корутину
     }
 
     @Test
-    fun `totalPrice should observe total price from TotalPriceUseCase`() = runTest {
-        // Given
-        val observer = mockk<Observer<Double?>>(relaxed = true)
-        viewModel.totalPrice.observeForever(observer)
+    fun `should observe total price in cart`() = runTest {
+        // Подготовка тестовых данных
+        val testTotalPrice = 100.0
+        val totalPriceFlow = MutableStateFlow<Double?>(null) // Изначально null
 
-        // When
-        val expectedPrice = 100.0
+        // Настройка mock для потока общей стоимости
+        every { totalPriceUseCase.observedTotalPriceInCart } returns totalPriceFlow
 
-        // Then
-        verify { observer.onChanged(expectedPrice) }
-        assertEquals(expectedPrice, viewModel.totalPrice.value)
+        // Инициализация ViewModel с обновленным totalPriceUseCase
+        viewModel = CartViewModel(removeItemUseCase, productObserveUseCase, totalPriceUseCase)
 
-        viewModel.totalPrice.removeObserver(observer)
+        // Запуск корутины для сбора данных из StateFlow
+        val collectedPrices = mutableListOf<Double?>()
+        val job = launch {
+            viewModel.totalPrice.collect { collectedPrices.add(it) }
+        }
+
+        // Эмитируем тестовую общую стоимость в поток
+        totalPriceFlow.value = testTotalPrice
+
+        // Симулируем задержку, чтобы дождаться эмиссии данных
+        advanceTimeBy(1000)
+
+        // Проверяем, что собранная общая стоимость совпадает с тестовой
+        assertEquals(testTotalPrice, collectedPrices.last())
+
+        job.cancel() // Завершаем корутину после теста
     }
 
     @Test
-    fun `removeItem should call removeItemFromCartUseCase`() = runTest {
-        // Given
-        val product = CoolShopDBO(1, "Product", "", 100.0, 4.5, false, "Test product", "Category")
-        coEvery { removeItemFromCartUseCase.execute(product) } just Runs
+    fun `should remove item from cart`() = runTest {
+        val testProduct = CoolShopDBO(1, "Product1", "path", 10.0, 5.0, true, "Description", "Category")
 
-        // When
-        viewModel.removeItem(product)
+        // Настройка mock для RemoveItemFromCartUseCase
+        coEvery { removeItemUseCase.execute(testProduct) } just Runs // Ожидаем, что метод будет вызван
 
-        // Then
-        coVerify { removeItemFromCartUseCase.execute(product) }
+        // Инициализация ViewModel
+        viewModel = CartViewModel(removeItemUseCase, productObserveUseCase, totalPriceUseCase)
+
+        // Вызываем метод удаления
+        viewModel.removeItem(testProduct)
+
+        // Даем время завершиться корутине
+        advanceUntilIdle() // Это важно, чтобы корутина завершила свою работу
+
+        // Проверяем, что метод execute был вызван с ожидаемым объектом
+        coVerify { removeItemUseCase.execute(testProduct) }
     }
 }

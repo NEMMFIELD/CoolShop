@@ -36,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textReview">
         <Button
-            android:id="@+id/addReview"
+            android:id="@+id/button_add_review"
             android:layout_width="@dimen/review_btn_width"
             android:layout_height="wrap_content"
             android:text="Add"
@@ -48,14 +48,14 @@
             />
 
         <Button
-            android:id="@+id/btnCancel"
+            android:id="@+id/button_cancel"
             android:layout_width="@dimen/review_btn_width"
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:layout_marginTop="@dimen/add_review_btn_margin_top"
             android:layout_marginStart="@dimen/add_review_btn_cancel_magin_start"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/addReview"
+            app:layout_constraintStart_toEndOf="@+id/button_add_review"
             app:layout_constraintTop_toBottomOf="@+id/textReview"
             tools:layout_editor_absoluteY="10dp" />
     </LinearLayout>

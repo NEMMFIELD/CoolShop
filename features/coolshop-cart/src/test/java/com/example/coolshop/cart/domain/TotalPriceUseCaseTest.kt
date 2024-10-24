@@ -1,11 +1,10 @@
 package com.example.coolshop.cart.domain
 
-import io.mockk.coEvery
+import com.example.coolshop.cart.data.CartRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +31,7 @@ class TotalPriceUseCaseTest {
         every { repository.flowSum } returns flowOf(expectedTotalPrice)
 
         // When: получаем flow с итоговой суммой из use case
-        val resultFlow = totalPriceUseCase.observedTotalPrice
+        val resultFlow = totalPriceUseCase.observedTotalPriceInCart
 
         // Then: collect используем внутри runTest и проверяем результат
         resultFlow.collect { totalPrice ->

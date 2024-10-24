@@ -1,7 +1,6 @@
 package com.example.coolshop.reviews.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +12,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.coolshop.reviews.data.UserReviewsAdapter
 import com.example.coolshop.reviews.databinding.FragmentShowingReviewsBinding
-import com.example.state.ApiState
+import com.example.state.State
 import com.example.utils.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -28,7 +26,7 @@ class ShowingUserReviewsFragment : Fragment() {
     private val binding get() = _binding
     private val viewModel: ShowUserReviewsViewModel by viewModels()
     private  var recyclerView: RecyclerView? = null
-    private var userReviewsAdapter:UserReviewsAdapter? = null
+    private var userReviewsAdapter: UserReviewsAdapter? = null
     @Inject
     lateinit var logger: Logger
 
@@ -48,18 +46,18 @@ class ShowingUserReviewsFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.reviewsStateFlow.collect { state ->
                     when (state) {
-                        is ApiState.Success -> {
+                        is State.Success -> {
                             viewModel.loadReviews(viewModel.productId?.toInt())
                             userReviewsAdapter?.submitList(state.data)
                         }
 
-                        is ApiState.Failure -> logger.d("TagError", "On Create ${state.message}")
+                        is State.Failure -> logger.d("TagError", "On Create ${state.message}")
                         else -> {}
                     }
                 }
             }
         }
-        binding?.reviewsBtnBack?.setOnClickListener { getBack() }
+        binding?.reviewsButtonToBack?.setOnClickListener { getBack() }
     }
 
     override fun onDestroyView() {
@@ -69,7 +67,7 @@ class ShowingUserReviewsFragment : Fragment() {
     }
     private fun setupUserReviewsRecycler() {
         userReviewsAdapter =  UserReviewsAdapter(emptyList(),requireContext())
-        recyclerView = binding!!.showedReviewsRecycler
+        recyclerView = binding!!.showedReviewsRecyclerview
         recyclerView?.layoutManager = LinearLayoutManager(requireContext())
         recyclerView?.adapter = userReviewsAdapter
     }

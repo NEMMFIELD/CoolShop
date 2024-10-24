@@ -1,11 +1,9 @@
 package com.example.coolshop.user.domain
 
-import io.mockk.coEvery
+import com.example.coolshop.user.data.LoginRepository
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 

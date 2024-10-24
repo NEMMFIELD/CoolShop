@@ -1,12 +1,12 @@
 package com.example.coolshop.main.domain
 
 
-import com.example.coolshop.api.models.ResponseItem
-import com.example.utils.Mapper
+import com.example.coolshop.api.models.ProductDTO
+import com.example.coolshop.main.data.CoolShopMapper
+import com.example.coolshop.main.data.CoolShopRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,7 +14,6 @@ import kotlinx.coroutines.cancel
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -46,8 +45,8 @@ class CoolShopProductsUseCaseTest {
     fun `should return mapped CoolShopModel list from repository products`() = runBlocking {
         // Given
         val responseItems = listOf(
-            ResponseItem(id = 1, title = "Product 1", price = 10.0, image = "image1.jpg"),
-            ResponseItem(id = 2, title = "Product 2", price = 15.0, image = "image2.jpg")
+            ProductDTO(id = 1, title = "Product 1", price = 10.0, image = "image1.jpg"),
+            ProductDTO(id = 2, title = "Product 2", price = 15.0, image = "image2.jpg")
         )
 
        // val myList = listOf<ResponseItem>()
@@ -56,7 +55,7 @@ class CoolShopProductsUseCaseTest {
         coEvery { repository.loadProducts() } returns responseItems
 
         // Mocking the Mapper functionality
-        val expectedModels = responseItems.map { Mapper.mapDTOToModel(it) }
+        val expectedModels = responseItems.map { CoolShopMapper.mapDTOToModel(it) }
 
         // When
         val result = useCase.execute()

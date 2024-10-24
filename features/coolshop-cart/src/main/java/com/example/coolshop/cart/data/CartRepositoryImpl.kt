@@ -1,5 +1,6 @@
 package com.example.coolshop.cart.data
 
+import com.example.coolshop.cart.domain.CartRepository
 import com.example.data.CoolShopModel
 import com.example.database.dao.CoolShopDao
 import com.example.database.models.CoolShopDBO
@@ -7,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class CartRepositoryImpl @Inject constructor(private val dao: CoolShopDao) : CartRepository {
+internal class CartRepositoryImpl @Inject constructor(private val dao: CoolShopDao) :
+    CartRepository {
     override var flowCart: Flow<List<CoolShopDBO>> = dao.observeAll()
 
     override var flowSum: Flow<Double?> = flowCart.map { listProducts ->

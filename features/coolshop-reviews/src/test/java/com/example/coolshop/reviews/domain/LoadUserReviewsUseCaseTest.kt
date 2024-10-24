@@ -1,7 +1,6 @@
 package com.example.coolshop.reviews.domain
 
 import android.util.Log
-import com.example.coolshop.reviews.data.UserReviewsRepository
 import com.example.database.models.UserReviewDBO
 import com.example.utils.Logger
 import io.mockk.Runs

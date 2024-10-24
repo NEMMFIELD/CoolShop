@@ -1,9 +1,9 @@
-package com.example.coolshop.main.data
+package com.example.coolshop.main.domain
 
 import com.example.coolshop.api.models.ProductDTO
 import com.example.data.CoolShopModel
 
-interface CoolShopRepository {
+internal interface CoolShopRepository {
    suspend fun loadProducts():List<ProductDTO>
     fun setFavourites(coolShopModel:CoolShopModel)
     fun getFavourites(id:String): Boolean

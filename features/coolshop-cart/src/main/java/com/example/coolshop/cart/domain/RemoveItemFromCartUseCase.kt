@@ -1,6 +1,5 @@
 package com.example.coolshop.cart.domain
 
-import com.example.coolshop.cart.data.CartRepository
 import com.example.database.models.CoolShopDBO
 import javax.inject.Inject
 

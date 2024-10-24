@@ -1,6 +1,5 @@
 package com.example.coolshop.cart.domain
 
-import com.example.coolshop.cart.data.CartRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -1,6 +1,5 @@
 package com.example.coolshop.cart.domain
 
-import com.example.coolshop.cart.data.CartRepository
 import com.example.data.CoolShopModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

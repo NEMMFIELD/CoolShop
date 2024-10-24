@@ -1,8 +1,8 @@
-package com.example.coolshop.reviews.data
+package com.example.coolshop.reviews.domain
 
 import com.example.database.models.UserReviewDBO
 
-interface UserReviewsRepository {
+internal interface UserReviewsRepository {
    suspend fun addReview(review: UserReviewDBO)
    suspend fun loadReviews(productId:Int?):List<UserReviewDBO>
 }

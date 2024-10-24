@@ -3,11 +3,12 @@ package com.example.coolshop.main.data
 import android.content.SharedPreferences
 import com.example.coolshop.api.CoolShopApi
 import com.example.coolshop.api.models.ProductDTO
+import com.example.coolshop.main.domain.CoolShopRepository
 import com.example.data.CoolShopModel
 import javax.inject.Inject
 
 
-class CoolShopRepositoryImpl @Inject constructor(
+internal class CoolShopRepositoryImpl @Inject constructor(
     private val api: CoolShopApi,
     private val sharedPreferences: SharedPreferences,
 ) : CoolShopRepository {

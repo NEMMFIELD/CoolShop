@@ -1,7 +1,5 @@
 package com.example.coolshop.reviews.domain
 
-import com.example.coolshop.reviews.data.UserReviewsRepository
-import com.example.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn

@@ -2,7 +2,7 @@ package com.example.coolshop.details.di
 
 import com.example.coolshop.api.CoolShopApi
 import com.example.coolshop.details.data.CoolShopDetailsRepositoryImpl
-import com.example.coolshop.details.data.CoolShopDetailsRepository
+import com.example.coolshop.details.domain.CoolShopDetailsRepository
 import com.example.database.dao.CoolShopDao
 import dagger.Module
 import dagger.Provides
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class DetailsRepositoryModule {
+internal class DetailsRepositoryModule {
     @Provides
     @Singleton
     fun provideRepositoryDetails(

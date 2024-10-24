@@ -2,7 +2,6 @@ package com.example.coolshop.main.domain
 
 
 import com.example.coolshop.main.data.CoolShopMapper
-import com.example.coolshop.main.data.CoolShopRepository
 import com.example.data.CoolShopModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

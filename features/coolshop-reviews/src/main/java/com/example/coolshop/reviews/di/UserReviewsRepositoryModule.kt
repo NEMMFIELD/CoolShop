@@ -1,7 +1,7 @@
 package com.example.coolshop.reviews.di
 
 import com.example.coolshop.reviews.data.UserReviewsRepositoryImpl
-import com.example.coolshop.reviews.data.UserReviewsRepository
+import com.example.coolshop.reviews.domain.UserReviewsRepository
 import com.example.database.dao.UserReviewsDao
 import dagger.Module
 import dagger.Provides
@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class UserReviewsRepositoryModule {
+internal class UserReviewsRepositoryModule {
     @Provides
     @Singleton
     fun provideRepositoryAddingReview(

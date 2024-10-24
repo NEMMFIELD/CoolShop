@@ -1,7 +1,7 @@
 package com.example.coolshop.cart.di
 
 import com.example.coolshop.cart.data.CartRepositoryImpl
-import com.example.coolshop.cart.data.CartRepository
+import com.example.coolshop.cart.domain.CartRepository
 import com.example.database.dao.CoolShopDao
 import dagger.Module
 import dagger.Provides
@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class CartRepositoryModule {
+internal class CartRepositoryModule {
     @Provides
     @Singleton
     fun provideRepositoryCart(dao: CoolShopDao): CartRepository = CartRepositoryImpl(dao)

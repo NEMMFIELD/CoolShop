@@ -1,6 +1,5 @@
 package com.example.coolshop.reviews.domain
 
-import com.example.coolshop.reviews.data.UserReviewsRepository
 import com.example.database.models.UserReviewDBO
 import javax.inject.Inject
 

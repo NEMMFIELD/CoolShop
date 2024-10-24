@@ -7,7 +7,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.example.coolshop.cart.data.CartRepository
+import com.example.coolshop.cart.domain.CartRepository
 import com.example.coolshop.databinding.ActivityMainBinding
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.bottomnavigation.BottomNavigationView

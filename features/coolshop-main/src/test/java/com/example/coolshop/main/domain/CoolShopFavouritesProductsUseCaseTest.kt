@@ -1,7 +1,6 @@
 package com.example.coolshop.main.domain
 
 import android.content.SharedPreferences
-import com.example.coolshop.main.data.CoolShopRepository
 import com.example.data.CoolShopModel
 import io.mockk.every
 import io.mockk.mockk

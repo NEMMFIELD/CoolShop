@@ -3,7 +3,6 @@ package com.example.coolshop.main.domain
 import com.example.coolshop.api.models.Rating
 import com.example.coolshop.api.models.ProductDTO
 import com.example.coolshop.main.data.CoolShopMapper
-import com.example.coolshop.main.data.CoolShopRepository
 import com.example.data.CoolShopModel
 import io.mockk.coEvery
 import io.mockk.mockk

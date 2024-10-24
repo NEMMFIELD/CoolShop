@@ -1,6 +1,5 @@
 package com.example.coolshop.user.domain
 
-import com.example.coolshop.user.data.LoginRepository
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

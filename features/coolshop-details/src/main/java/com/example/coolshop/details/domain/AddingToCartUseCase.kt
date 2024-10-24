@@ -1,6 +1,5 @@
 package com.example.coolshop.details.domain
 
-import com.example.coolshop.details.data.CoolShopDetailsRepository
 import com.example.database.models.CoolShopDBO
 import javax.inject.Inject
 

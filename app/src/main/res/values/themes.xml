@@ -2,15 +2,15 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.CoolShop" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-    <!--   <item name="colorPrimary">@color/my_light_primary</item> -->
-  </style>
+        <!-- <item name="colorPrimary">@color/red</item>-->
+     </style>
 
-  <style name="Theme.CoolShop" parent="Base.Theme.CoolShop" />
+     <style name="Theme.CoolShop" parent="Base.Theme.CoolShop" />
 
 
-   <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-      <item name="windowSplashScreenBackground">#202020</item>
-      <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/ic_splashscreen_logo_animated</item>
-      <item name="postSplashScreenTheme">@style/Theme.CoolShop</item>
-  </style>
-</resources>
+      <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+         <item name="windowSplashScreenBackground">#202020</item>
+         <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/ic_splashscreen_logo_animated</item>
+         <item name="postSplashScreenTheme">@style/Theme.CoolShop</item>
+     </style>
+   </resources>

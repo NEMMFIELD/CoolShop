@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.SavedStateHandle
 import com.example.coolshop.api.models.LoginRequest
 import com.example.coolshop.api.models.RegistrationResponse
 import com.example.coolshop.user.domain.LoginUseCase
@@ -44,17 +45,24 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class UserViewModelTest {
 
+    @get:Rule
+    val instantExecutorRule = InstantTaskExecutorRule()
+
+    private val loginUseCase: LoginUseCase = mockk()
+    private val saveTokenUseCase: SaveTokenUseCase = mockk()
+    private val logger: Logger = mockk(relaxed = true)
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
     private lateinit var viewModel: UserViewModel
-    private val loginUseCase = mockk<LoginUseCase>()
-    private val saveTokenUseCase = mockk<SaveTokenUseCase>()
-    private val logger = mockk<Logger>(relaxed = true)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
-        viewModel = UserViewModel(loginUseCase, saveTokenUseCase, logger)
+        Dispatchers.setMain(testDispatcher)
+        viewModel = UserViewModel(loginUseCase, saveTokenUseCase, logger, savedStateHandle)
     }
 
     @After
@@ -63,44 +71,34 @@ class UserViewModelTest {
     }
 
     @Test
-    fun `should update token on successful login`() = runTest {
-        // Подготовка тестового запроса
+    fun `login should update token and call saveToken`() = runTest {
+        // Arrange
         val loginRequest = LoginRequest("username", "password")
         val expectedToken = "test_token"
-
-        // Настройка мока для LoginUseCase
         coEvery { loginUseCase.execute(loginRequest) } returns RegistrationResponse(expectedToken)
+        coEvery { saveTokenUseCase.execute(expectedToken) } just Runs
 
-        // Запуск корутины для сбора состояния токена
-        val job = launch {
-            viewModel.token.first()
-        }
-
-        // Выполнение входа
+        // Act
         viewModel.login(loginRequest)
 
-        // Проверяем, что токен обновился
-        advanceUntilIdle() // Дожидаемся выполнения всех корутин
-        assertEquals(expectedToken, viewModel.token.value)
-
-        job.cancel() // Завершаем корутину
+        // Assert
+        assertEquals(expectedToken, viewModel.token.first())
+        assertEquals(expectedToken, savedStateHandle["token"])
+        coVerify { saveTokenUseCase.execute(expectedToken) }
     }
 
     @Test
-    fun `should call saveTokenUseCase when saving token`() = runTest {
-        // Подготовка тестового токена
-        val tokenToSave = "test_token"
+    fun `login should log exception on failure`() = runTest {
+        // Arrange
+        val loginRequest = LoginRequest("username", "password")
+        val exception = RuntimeException("Network error")
+        coEvery { loginUseCase.execute(loginRequest) } throws exception
+        every { logger.d(any(), any()) } just Runs
 
-        // Ожидание вызова execute в saveTokenUseCase
-        coEvery { saveTokenUseCase.execute(tokenToSave) } just Runs
+        // Act
+        viewModel.login(loginRequest)
 
-        // Выполнение сохранения токена
-        viewModel.saveToken(tokenToSave)
-
-        // Даем время для завершения корутины
-        advanceUntilIdle()
-
-        // Проверяем, что метод saveTokenUseCase был вызван
-        coVerify { saveTokenUseCase.execute(tokenToSave) }
+        // Assert
+        coVerify { logger.d("Error", "Coroutine exception: $exception") }
     }
 }

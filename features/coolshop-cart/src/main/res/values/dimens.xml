@@ -5,7 +5,7 @@
     <dimen name="height_image_cart">25dp</dimen>
     <dimen name="toolbar_title_size">20sp</dimen>
     <dimen name="margin_toolbar_cart_title">30dp</dimen>
-    <dimen name="margin_top_total_container">50dp</dimen>
+    <dimen name="margin_top_total_container">30dp</dimen>
     <dimen name="margin_start_total_title">10dp</dimen>
     <dimen name="margin_top_total_title">15dp</dimen>
     <dimen name="margin_bottom_total_title">15dp</dimen>

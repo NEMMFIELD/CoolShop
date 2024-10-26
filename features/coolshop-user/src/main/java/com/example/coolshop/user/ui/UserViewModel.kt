@@ -1,5 +1,6 @@
 package com.example.coolshop.user.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coolshop.api.models.LoginRequest
@@ -19,21 +20,25 @@ import javax.inject.Inject
 class UserViewModel @Inject internal constructor(
     private val useCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
-    private val logger: Logger
+    private val logger: Logger,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         logger.d("Error", "Coroutine exception: $exception")
     }
 
-    private val _token = MutableStateFlow<String?>(null)
+    private val _token = MutableStateFlow(savedStateHandle.get<String?>("token"))
     val token: StateFlow<String?> get() = _token
 
-    var account = LoginRequest("", "")
+    var accountUserName = ""
 
     fun login(loginRequest: LoginRequest) {
         viewModelScope.launch(exceptionHandler) {
-            _token.value = useCase.execute(loginRequest = loginRequest).token
+            val result = useCase.execute(loginRequest = loginRequest).token
+            _token.value = result
+            savedStateHandle["token"] = result
+            saveToken(result)
         }
     }
 

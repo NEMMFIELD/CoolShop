@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.coolshop.api.models.LoginRequest
 import com.example.coolshop.user.databinding.FragmentUserBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -27,37 +28,32 @@ class UserFragment : Fragment() {
         return view
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.token.collect { token ->
                     if (!token.isNullOrEmpty()) {
-                        viewModel.saveToken(token)
-                        binding?.currentUser?.text = (viewModel.account.username)
+                        binding?.currentUser?.text = viewModel.accountUserName
                     }
                 }
             }
         }
 
-        with(binding) {
-            this?.buttonLogin?.setOnClickListener {
-                setupAccount()
-                viewModel.login(
-                    viewModel.account
-                )
-            }
+        binding?.buttonLogin?.setOnClickListener {
+            val username = binding?.fieldEnterName?.text.toString()
+            val password = binding?.fieldEnterPassword?.text.toString()
+            viewModel.login(LoginRequest(username, password))
+            viewModel.accountUserName = username
+            binding?.fieldEnterName?.text?.clear()
+            binding?.fieldEnterPassword?.text?.clear()
         }
     }
+
 
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
-    }
-
-    private fun setupAccount() {
-        viewModel.account.username = binding?.fieldEnterName?.text.toString()
-        viewModel.account.password = binding?.fieldEnterPassword?.text.toString()
     }
 }

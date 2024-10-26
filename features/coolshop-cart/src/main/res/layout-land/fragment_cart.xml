@@ -87,7 +87,7 @@
         android:background="@drawable/total_box_background"
         app:layout_constraintEnd_toEndOf="@id/rightGuideline"
         app:layout_constraintStart_toStartOf="@id/leftGuideline"
-        app:layout_constraintTop_toBottomOf="@+id/bottomGuideline">
+        app:layout_constraintTop_toBottomOf="@+id/card_recyclerview">
 
         <TextView
             android:id="@+id/total_title"

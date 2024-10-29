@@ -3,6 +3,8 @@ package com.example.coolshop.di
 import android.content.Context
 import com.example.database.CoolShopDatabase
 import com.example.database.UserReviewsDatabase
+import com.example.database.dao.CoolShopDao
+import com.example.database.dao.UserReviewsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,9 +29,13 @@ class DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDao(database: CoolShopDatabase) = database.coolShopDao
+    fun provideDao(database: CoolShopDatabase):CoolShopDao {
+       return database.coolShopDao ?: error("Database reference is null")
+    }
 
     @Provides
     @Singleton
-    fun provideUserReviewsDao(database: UserReviewsDatabase) = database.userReviewsDao
+    fun provideUserReviewsDao(database: UserReviewsDatabase) :UserReviewsDao {
+        return database.userReviewsDao ?: error ("UserReviewsDatabase reference is null")
+    }
 }

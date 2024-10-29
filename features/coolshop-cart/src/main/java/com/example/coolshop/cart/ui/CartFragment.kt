@@ -40,7 +40,7 @@ class CartFragment : Fragment(), ClickListener {
         setupRecycler()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.productsInCart.collect { productsListInDatabase ->
+                viewModel.productsInCart?.collect { productsListInDatabase ->
                     cartAdapter?.submitList(productsListInDatabase.map { productsInDatabase ->
                         CartMapper.mapModelDBOToModel(productsInDatabase)
                     })
@@ -50,7 +50,7 @@ class CartFragment : Fragment(), ClickListener {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.totalPrice.collect { totalSum ->
+                viewModel.totalPrice?.collect { totalSum ->
                     binding?.totalPrice?.text =
                         totalSum.toString().plus(context?.getString(R.string.dollar))
                 }

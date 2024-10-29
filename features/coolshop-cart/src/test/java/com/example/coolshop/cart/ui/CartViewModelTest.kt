@@ -64,7 +64,7 @@ class CartViewModelTest {
         // Запуск корутины для сбора данных из StateFlow
         val collectedProducts = mutableListOf<List<CoolShopDBO>>()
         val job = launch {
-            viewModel.productsInCart.collect { collectedProducts.add(it) }
+            viewModel.productsInCart?.collect { collectedProducts.add(it) }
         }
 
         // Эмитируем тестовые данные в поток
@@ -94,7 +94,7 @@ class CartViewModelTest {
         // Запуск корутины для сбора данных из StateFlow
         val collectedPrices = mutableListOf<Double?>()
         val job = launch {
-            viewModel.totalPrice.collect { collectedPrices.add(it) }
+            viewModel.totalPrice?.collect { collectedPrices.add(it) }
         }
 
         // Эмитируем тестовую общую стоимость в поток

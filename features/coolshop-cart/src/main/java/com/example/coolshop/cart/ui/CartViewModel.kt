@@ -22,14 +22,14 @@ internal class CartViewModel @Inject constructor(
     totalPriceUseCase: TotalPriceUseCase,
 ) : ViewModel() {
 
-    var productsInCart: StateFlow<List<CoolShopDBO>> =
-        observedProductObserveUseCase.observedProductsInCart.stateIn(
+    var productsInCart: StateFlow<List<CoolShopDBO>>? =
+        observedProductObserveUseCase.observedProductsInCart?.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
         )
 
-    var totalPrice: StateFlow<Double?> = totalPriceUseCase.observedTotalPriceInCart.stateIn(
+    var totalPrice: StateFlow<Double?>? = totalPriceUseCase.observedTotalPriceInCart?.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         null

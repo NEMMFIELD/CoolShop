@@ -50,7 +50,7 @@ class ShowUserReviewsViewModel @Inject internal constructor(
 
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             loadUserReviewsUseCase.execute(productId).collect { reviews ->
-                if (reviews.isEmpty()) {
+                if (reviews.isNullOrEmpty()) {
                     _reviewsStateFlow.value =
                         State.Success(emptyList()) // Или другой подход, если необходимо
                     return@collect // Выход из collect, если данных нет

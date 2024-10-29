@@ -1,5 +1,6 @@
 package com.example.coolshop.details.data
 
+import android.util.Log
 import com.example.coolshop.api.CoolShopApi
 import com.example.coolshop.api.models.ProductDTO
 import com.example.coolshop.details.domain.CoolShopDetailsRepository
@@ -9,7 +10,7 @@ import javax.inject.Inject
 
 internal class CoolShopDetailsRepositoryImpl @Inject constructor(
     private val api: CoolShopApi,
-    private val dao: CoolShopDao
+    private val dao: CoolShopDao?
 ) : CoolShopDetailsRepository {
 
     override suspend fun loadProductDetails(id: String): ProductDTO {
@@ -17,6 +18,6 @@ internal class CoolShopDetailsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addToCart(product: CoolShopDBO) {
-        dao.insert(product)
+        dao?.insert(product) ?: Log.d("CoolShopDetails", "CoolShopDao reference is null")
     }
 }

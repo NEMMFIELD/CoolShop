@@ -7,10 +7,12 @@ import androidx.room.RoomDatabase
 import com.example.database.dao.UserReviewsDao
 import com.example.database.models.CoolShopDBO
 import com.example.database.models.UserReviewDBO
+import java.lang.ref.WeakReference
 
 class UserReviewsDatabase internal constructor(private val database: UserReviewsRoomDatabase) {
-    val userReviewsDao: UserReviewsDao
-        get() = database.userReviewsDao()
+    private val userReviewsDatabaseReference = WeakReference(database)
+    val userReviewsDao: UserReviewsDao?
+        get() = userReviewsDatabaseReference.get()?.userReviewsDao()
 }
 
 @Database(entities = [UserReviewDBO::class], version = 2, exportSchema = false)

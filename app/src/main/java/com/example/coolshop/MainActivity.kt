@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun setBadge() {
-        cartRepository.flowCart.collect { list ->
+        cartRepository.flowCart?.collect { list ->
             if (list.isEmpty()) badge?.isVisible = false
             else {
                 badge?.isVisible = true

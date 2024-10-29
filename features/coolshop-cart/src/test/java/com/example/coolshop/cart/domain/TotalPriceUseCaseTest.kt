@@ -33,7 +33,7 @@ class TotalPriceUseCaseTest {
         val resultFlow = totalPriceUseCase.observedTotalPriceInCart
 
         // Then: collect используем внутри runTest и проверяем результат
-        resultFlow.collect { totalPrice ->
+        resultFlow?.collect { totalPrice ->
             assertEquals(expectedTotalPrice, totalPrice!!, 0.0)
         }
 

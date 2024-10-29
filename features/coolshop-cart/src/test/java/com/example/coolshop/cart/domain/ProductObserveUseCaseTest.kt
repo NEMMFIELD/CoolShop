@@ -36,7 +36,7 @@ class ProductObserveUseCaseTest {
         val resultFlow = productObserveUseCase.observedProductsInCart
 
         // Then: collect используем внутри runTest и проверяем результат
-        resultFlow.collect { productList ->
+        resultFlow?.collect { productList ->
             assertEquals(expectedProducts, productList)
         }
 

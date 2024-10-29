@@ -40,7 +40,7 @@ class CartRepositoryImplTest{
         val resultFlow = repository.flowCart
 
         // Then: collect и проверка результата
-        resultFlow.collect { productList ->
+        resultFlow?.collect { productList ->
             assertEquals(expectedProducts, productList)
         }
 
@@ -61,7 +61,7 @@ class CartRepositoryImplTest{
         val resultFlow = repository.flowSum
 
         // Then: collect и проверка результата
-        resultFlow.collect { totalSum ->
+        resultFlow?.collect { totalSum ->
             assertEquals(30.0, totalSum!!, 0.0)
         }
     }
